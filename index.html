@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PD_HRV · Qualtrics Processor</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap');
+
+  :root {
+    --bg:        #0d1117;
+    --surface:   #161b22;
+    --surface2:  #1c2433;
+    --border:    #2a3444;
+    --accent:    #58a6ff;
+    --accent2:   #3fb68b;
+    --accent3:   #f97316;
+    --text:      #e6edf3;
+    --muted:     #7d8590;
+    --danger:    #ff6b6b;
+    --warn:      #fbbf24;
+
+    --navy:      #1F3864;
+    --blue:      #2E75B6;
+    --pale:      #D6E4F0;
+    --altrow:    #F2F7FB;
+    --ok:        #E2EFDA;
+    --okfg:      #375623;
+    --warnbg:    #FFE699;
+    --warnfg:    #7F4E00;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Background grid ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(88,166,255,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(88,166,255,.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 64px 24px 80px;
+  }
+
+  /* ── Header ── */
+  .header {
+    margin-bottom: 56px;
+  }
+
+  .badge {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 3px;
+    padding: 3px 8px;
+    margin-bottom: 20px;
+    opacity: .85;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -.02em;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+
+  h1 span { color: var(--accent); font-style: italic; }
+
+  .subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 520px;
+  }
+
+  /* ── Drop Zones ── */
+  .drop-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .drop-zone {
+    border: 1.5px dashed var(--border);
+    border-radius: 10px;
+    padding: 32px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .2s, background .2s, transform .15s;
+    background: var(--surface);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .drop-zone::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 0%, rgba(88,166,255,.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .drop-zone:hover, .drop-zone.dragover {
+    border-color: var(--accent);
+    background: var(--surface2);
+    transform: translateY(-2px);
+  }
+
+  .drop-zone.loaded {
+    border-color: var(--accent2);
+    border-style: solid;
+  }
+
+  .drop-zone.loaded::after {
+    background: radial-gradient(circle at 50% 0%, rgba(63,182,139,.07) 0%, transparent 70%);
+  }
+
+  .drop-icon {
+    font-size: 28px;
+    margin-bottom: 12px;
+    display: block;
+    filter: grayscale(.4);
+    transition: filter .2s, transform .2s;
+  }
+  .drop-zone:hover .drop-icon { filter: none; transform: scale(1.1); }
+
+  .drop-label {
+    font-size: 11px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  .drop-title {
+    font-size: 13px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .drop-sub {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .drop-filename {
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--accent2);
+    word-break: break-all;
+  }
+
+  input[type="file"] { display: none; }
+
+  /* ── Process Button ── */
+  .btn-wrap { text-align: center; margin-bottom: 40px; }
+
+  .btn-process {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--accent);
+    color: #0d1117;
+    border: none;
+    border-radius: 8px;
+    padding: 14px 36px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: .04em;
+    cursor: pointer;
+    transition: background .2s, transform .15s, box-shadow .2s;
+    box-shadow: 0 0 0 0 rgba(88,166,255,.4);
+  }
+
+  .btn-process:hover:not(:disabled) {
+    background: #79baff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(88,166,255,.25);
+  }
+
+  .btn-process:disabled {
+    background: var(--border);
+    color: var(--muted);
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .btn-process .spinner {
+    width: 14px; height: 14px;
+    border: 2px solid rgba(0,0,0,.2);
+    border-top-color: #0d1117;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    display: none;
+  }
+  .btn-process.loading .spinner { display: block; }
+  .btn-process.loading .btn-text { opacity: .7; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Log / Status ── */
+  .log-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    font-size: 12px;
+    line-height: 1.9;
+    min-height: 80px;
+    max-height: 260px;
+    overflow-y: auto;
+    display: none;
+    margin-bottom: 24px;
+  }
+
+  .log-box.visible { display: block; animation: fadeIn .3s ease; }
+
+  .log-line { display: flex; align-items: baseline; gap: 10px; }
+  .log-time { color: var(--muted); font-size: 10px; flex-shrink: 0; }
+  .log-ok   { color: var(--accent2); }
+  .log-info { color: var(--accent); }
+  .log-warn { color: var(--warn); }
+  .log-err  { color: var(--danger); }
+
+  /* ── Results ── */
+  .results {
+    display: none;
+    animation: slideUp .4s ease;
+  }
+  .results.visible { display: block; }
+
+  @keyframes fadeIn  { from { opacity: 0 } to { opacity: 1 } }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(16px) } to { opacity: 1; transform: none } }
+
+  .results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .results-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.4rem;
+    font-weight: 300;
+    color: var(--text);
+  }
+
+  .btn-download {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent2);
+    color: #0d1117;
+    border: none;
+    border-radius: 7px;
+    padding: 10px 22px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background .2s, transform .15s;
+  }
+  .btn-download:hover { background: #56d4a3; transform: translateY(-1px); }
+
+  /* ── Score Cards ── */
+  .participant-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .participant-header {
+    background: var(--surface2);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .pid-badge {
+    background: var(--accent);
+    color: #0d1117;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 4px;
+    letter-spacing: .04em;
+  }
+
+  .demo-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .chip {
+    font-size: 10px;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 2px 7px;
+    letter-spacing: .04em;
+  }
+
+  .scores-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 1px;
+    background: var(--border);
+  }
+
+  .score-card {
+    background: var(--surface);
+    padding: 16px 18px;
+    transition: background .15s;
+  }
+  .score-card:hover { background: var(--surface2); }
+
+  .sc-scale {
+    font-size: 10px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .sc-value {
+    font-family: 'Fraunces', serif;
+    font-size: 1.8rem;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .sc-value.na { color: var(--muted); font-size: 1.2rem; font-style: italic; }
+
+  .sc-label {
+    font-size: 10px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  .sc-range {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 9px;
+    color: var(--border);
+    letter-spacing: .05em;
+    background: var(--surface2);
+    padding: 1px 5px;
+    border-radius: 2px;
+  }
+
+  /* Clinical threshold colouring */
+  .thresh-ok   { color: #56d4a3; }
+  .thresh-mild { color: var(--warn); }
+  .thresh-high { color: var(--danger); }
+
+  /* Missing data mini-table */
+  .missing-section {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .missing-title {
+    font-size: 10px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .missing-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .miss-pill {
+    font-size: 10px;
+    padding: 3px 9px;
+    border-radius: 3px;
+    letter-spacing: .04em;
+  }
+  .miss-ok   { background: rgba(86,212,163,.15); color: #56d4a3; }
+  .miss-warn { background: rgba(251,191,36,.15);  color: var(--warn); }
+  .miss-bad  { background: rgba(255,107,107,.15); color: var(--danger); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 600px) {
+    .drop-grid { grid-template-columns: 1fr; }
+    .scores-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="badge">University of Waterloo · PD_HRV Study</div>
+    <h1>Qualtrics <span>Processor</span></h1>
+    <p class="subtitle">Drop the two Qualtrics export files below. All scoring runs locally in your browser — no data leaves your machine. Download the scored Excel when ready.</p>
+  </div>
+
+  <!-- Drop Zones -->
+  <div class="drop-grid">
+    <div class="drop-zone" id="zone-values" onclick="document.getElementById('input-values').click()">
+      <input type="file" id="input-values" accept=".xlsx,.xls">
+      <span class="drop-icon">📊</span>
+      <div class="drop-label">File 1 · Values</div>
+      <div class="drop-title">_Values.xlsx</div>
+      <div class="drop-sub">Numeric Qualtrics export</div>
+      <div class="drop-filename" id="fn-values"></div>
+    </div>
+    <div class="drop-zone" id="zone-labels" onclick="document.getElementById('input-labels').click()">
+      <input type="file" id="input-labels" accept=".xlsx,.xls">
+      <span class="drop-icon">🏷️</span>
+      <div class="drop-label">File 2 · Labels</div>
+      <div class="drop-title">_17.22.xlsx</div>
+      <div class="drop-sub">Text labels Qualtrics export</div>
+      <div class="drop-filename" id="fn-labels"></div>
+    </div>
+  </div>
+
+  <!-- Process Button -->
+  <div class="btn-wrap">
+    <button class="btn-process" id="btn-run" disabled onclick="runProcessor()">
+      <div class="spinner"></div>
+      <span class="btn-text">⚡ Score Questionnaires</span>
+    </button>
+  </div>
+
+  <!-- Log -->
+  <div class="log-box" id="log-box"></div>
+
+  <!-- Results -->
+  <div class="results" id="results">
+    <div class="results-header">
+      <div class="results-title">Results</div>
+      <button class="btn-download" id="btn-dl" onclick="downloadExcel()">
+        ⬇ Download Scored Excel
+      </button>
+    </div>
+    <div id="cards-container"></div>
+  </div>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// FILE HANDLING
+// ─────────────────────────────────────────────────────────────────────────────
+let vFile = null, lFile = null;
+let lastScored = null; // stored for download
+
+function setupDrop(zoneId, inputId, fileVar, fnId) {
+  const zone = document.getElementById(zoneId);
+  const input = document.getElementById(inputId);
+  const fn    = document.getElementById(fnId);
+
+  input.addEventListener('change', e => {
+    const f = e.target.files[0];
+    if (!f) return;
+    if (fileVar === 'v') vFile = f; else lFile = f;
+    zone.classList.add('loaded');
+    fn.textContent = f.name;
+    checkReady();
+  });
+
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('dragover');
+    const f = e.dataTransfer.files[0];
+    if (!f) return;
+    if (fileVar === 'v') vFile = f; else lFile = f;
+    zone.classList.add('loaded');
+    fn.textContent = f.name;
+    checkReady();
+  });
+}
+
+setupDrop('zone-values', 'input-values', 'v', 'fn-values');
+setupDrop('zone-labels', 'input-labels', 'l', 'fn-labels');
+
+function checkReady() {
+  document.getElementById('btn-run').disabled = !(vFile && lFile);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LOGGING
+// ─────────────────────────────────────────────────────────────────────────────
+function log(msg, type='info') {
+  const box = document.getElementById('log-box');
+  box.classList.add('visible');
+  const now = new Date().toLocaleTimeString('en-US', {hour12:false});
+  const line = document.createElement('div');
+  line.className = 'log-line';
+  line.innerHTML = `<span class="log-time">${now}</span><span class="log-${type}">${msg}</span>`;
+  box.appendChild(line);
+  box.scrollTop = box.scrollHeight;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// XLSX PARSING
+// ─────────────────────────────────────────────────────────────────────────────
+function readXlsx(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const wb = XLSX.read(e.target.result, {type:'array', cellDates:true});
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const arr = XLSX.utils.sheet_to_json(ws, {header:1, defval:null, raw:true});
+        resolve(arr);
+      } catch(err) { reject(err); }
+    };
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+function parseQualtrics(arr) {
+  // Row 0: col codes, Row 1: question text, Row 2+: data
+  const codes  = (arr[0]  || []).map(v => v == null ? '' : String(v));
+  const qtext  = (arr[1]  || []).map(v => v == null ? '' : String(v));
+  const data   = arr.slice(2);
+
+  // Make codes unique
+  const seen = {};
+  const uniqueCodes = codes.map(c => {
+    if (seen[c] === undefined) { seen[c] = 0; return c; }
+    seen[c]++; return c + '_' + seen[c];
+  });
+
+  return { codes: uniqueCodes, qtext, data };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────────────────────────────
+const toNum = v => {
+  if (v === null || v === undefined || v === '') return NaN;
+  const n = Number(v);
+  return isNaN(n) ? NaN : n;
+};
+
+const isNaN2 = v => v === null || v === undefined || Number.isNaN(v) || v === '';
+
+const nanSum = arr => arr.reduce((acc, x) => acc + (isNaN2(x) ? 0 : x), 0);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SCORING
+// ─────────────────────────────────────────────────────────────────────────────
+
+function scoreNFOGQ(vrow) {
+  const q1 = toNum(vrow[26]);
+  if (isNaN2(q1)) return { NFOG_Q_Total: NaN, NFOG_Q_FOG_Present: NaN };
+  if (q1 === 1)   return { NFOG_Q_Total: 0,   NFOG_Q_FOG_Present: 0 };
+  const items = [];
+  for (let c = 27; c < 35; c++) items.push(toNum(vrow[c]));
+  const conv = items.map(x => isNaN2(x) ? NaN : x - 1);
+  const nMiss = conv.filter(x => isNaN2(x)).length;
+  const total = nMiss < 4 ? nanSum(conv) : NaN;
+  return { NFOG_Q_Total: total, NFOG_Q_FOG_Present: 1, NFOG_Q_Missing_Items: nMiss };
+}
+
+function scorePDQ39(vrow) {
+  const raw = [];
+  for (let c = 35; c < 74; c++) raw.push(toNum(vrow[c]));
+  const conv = raw.map(x => isNaN2(x) ? NaN : x - 1);
+
+  const subs = {
+    PDQ39_Mobility:      [conv.slice(0,10),  10],
+    PDQ39_ADL:           [conv.slice(10,16),  6],
+    PDQ39_Emotional:     [conv.slice(16,22),  6],
+    PDQ39_Stigma:        [conv.slice(22,26),  4],
+    PDQ39_Social:        [conv.slice(26,29),  3],
+    PDQ39_Cognition:     [conv.slice(29,33),  4],
+    PDQ39_Communication: [conv.slice(33,36),  3],
+    PDQ39_Bodily:        [conv.slice(36,39),  3],
+  };
+
+  const scores = {};
+  const siVals = [];
+  for (const [name, [items, nMax]] of Object.entries(subs)) {
+    const nMiss = items.filter(x => isNaN2(x)).length;
+    if (nMiss > Math.floor(nMax / 2)) { scores[name] = NaN; }
+    else {
+      const s = Math.round((nanSum(items) / (nMax * 4)) * 10000) / 100;
+      scores[name] = s; siVals.push(s);
+    }
+  }
+  scores.PDQ39_SI = siVals.length ? Math.round(siVals.reduce((a,b)=>a+b,0)/siVals.length*100)/100 : NaN;
+  scores.PDQ39_Missing_Items = conv.filter(x => isNaN2(x)).length;
+  return scores;
+}
+
+function scorePAS(vrow) {
+  const persistent = []; for (let c=74;c<79;c++) persistent.push(toNum(vrow[c]));
+  const episodic   = []; for (let c=79;c<83;c++) episodic.push(toNum(vrow[c]));
+  const avoidance  = []; for (let c=83;c<86;c++) avoidance.push(toNum(vrow[c]));
+
+  const sub = (items, label) => {
+    const nMiss = items.filter(x=>isNaN2(x)).length;
+    return { [label]: nMiss > Math.floor(items.length/2) ? NaN : nanSum(items),
+             [label+'_Missing']: nMiss };
+  };
+
+  const scores = {};
+  Object.assign(scores, sub(persistent, 'PAS_Persistent'));
+  Object.assign(scores, sub(episodic,   'PAS_Episodic'));
+  Object.assign(scores, sub(avoidance,  'PAS_Avoidance'));
+  const all = [...persistent,...episodic,...avoidance];
+  const nMissAll = all.filter(x=>isNaN2(x)).length;
+  scores.PAS_Total = nMissAll <= 3 ? nanSum(all) : NaN;
+  return scores;
+}
+
+function scoreHADS(vrow) {
+  const items = []; for (let c=124;c<138;c++) items.push(toNum(vrow[c]));
+  const anxIdx = [0,2,4,6,8,10,12];
+  const depIdx = [1,3,5,7,9,11,13];
+  const anx = anxIdx.map(i=>items[i]);
+  const dep = depIdx.map(i=>items[i]);
+  const sub = (vals, label) => {
+    const nMiss = vals.filter(x=>isNaN2(x)).length;
+    return { [label]: nMiss <= 2 ? nanSum(vals) : NaN, [label+'_Missing']: nMiss };
+  };
+  return { ...sub(anx,'HADS_Anxiety'), ...sub(dep,'HADS_Depression') };
+}
+
+function scorePROFOG(vrow) {
+  const items = []; for (let c=138;c<154;c++) items.push(toNum(vrow[c]));
+  const conv  = items.map(x=>isNaN2(x)?NaN:x-1);
+  const nMiss = conv.filter(x=>isNaN2(x)).length;
+  return { PRO_FOG_Total: nMiss<=3 ? nanSum(conv) : NaN, PRO_FOG_Missing: nMiss };
+}
+
+function scorePASE(vrow) {
+  const freqWt = {1:0, 2:0.11, 3:0.43, 4:1.0};
+  const hrsWt  = {1:0.5, 2:1.5, 3:3.0, 4:5.0};
+  const actScore = (fCol, hCol, wt) => {
+    const f = toNum(vrow[fCol]);
+    if (isNaN2(f) || f===1) return 0;
+    const h = toNum(vrow[hCol]);
+    return (freqWt[f]||0) * (isNaN2(h)?0:(hrsWt[h]||0)) * wt;
+  };
+  let pase = 0;
+  pase += actScore(154,156,1.0);
+  pase += actScore(157,158,1.5);
+  pase += actScore(159,161,1.5);
+  pase += actScore(162,164,3.0);
+  pase += actScore(165,167,4.5);
+  pase += actScore(168,170,3.0);
+  const bin25 = col => toNum(vrow[col])===2 ? 25 : 0;
+  for (let c=171;c<=176;c++) pase += bin25(c);
+  const work = toNum(vrow[177]);
+  if (work===2) { const h=toNum(vrow[178]); pase += (isNaN2(h)?0:h)*21; }
+  return { PASE_Total: Math.round(pase*10)/10 };
+}
+
+function scoreFESI(vrow) {
+  const items = []; for (let c=198;c<214;c++) items.push(toNum(vrow[c]));
+  const nMiss = items.filter(x=>isNaN2(x)).length;
+  return { FES_I_Total: nMiss<=3 ? nanSum(items) : NaN, FES_I_Missing: nMiss };
+}
+
+function scoreSTAITrait(vrow) {
+  const items = []; for (let c=215;c<235;c++) items.push(toNum(vrow[c]));
+  const posIdx = new Set([1,3,6,7,10,13,14,16,19]);
+  const conv = items.map((x,i) => isNaN2(x) ? NaN : (posIdx.has(i+1) ? x : 5-x));
+  const nMiss = conv.filter(x=>isNaN2(x)).length;
+  return { STAI_Trait_Total: nMiss<=4 ? nanSum(conv) : NaN, STAI_Trait_Missing: nMiss };
+}
+
+function scoreMSQ(vrow) {
+  return {
+    MSQ_ActsOutDreams:   toNum(vrow[180]),
+    MSQ_LegsTwitch:      toNum(vrow[186]),
+    MSQ_RestlessLegs:    toNum(vrow[187]),
+    MSQ_Sleepwalking:    toNum(vrow[191]),
+    MSQ_SnortChoke:      toNum(vrow[192]),
+    MSQ_StopBreathing:   toNum(vrow[193]),
+    MSQ_LegCramps:       toNum(vrow[195]),
+    MSQ_Alertness_0to10: toNum(vrow[196]),
+  };
+}
+
+function scoreCFOG(vrow) {
+  const hasFog = toNum(vrow[86]);
+  const freq   = toNum(vrow[87]);
+  return {
+    CFOG_Has_FOG:  hasFog===1 ? 0 : (hasFog===2 ? 1 : NaN),
+    CFOG_Frequency: hasFog===2 ? freq : (hasFog===1 ? 0 : NaN),
+  };
+}
+
+function scoreDemographics(vrow, lrow) {
+  const gMap = {1:'Man',2:'Woman',3:'Non-binary',4:'Self-describe'};
+  const gVal = toNum(vrow[20]);
+  const dur  = toNum(vrow[5]);
+  return {
+    Participant_ID:   String(lrow[19] || ''),
+    Gender:           gMap[gVal] || '',
+    Age:              toNum(vrow[22]),
+    Symptom_Onset:    String(lrow[23] || ''),
+    Formal_Diagnosis: String(lrow[24] || ''),
+    Date_Completed:   vrow[0] ? String(vrow[0]).slice(0,10) : '',
+    Duration_min:     isNaN2(dur) ? NaN : Math.round(dur/60*10)/10,
+  };
+}
+
+function checkMissing(vrow) {
+  const ranges = {
+    'NFOG-Q':    [26,35],  'PDQ-39':   [35,74], 'PAS':    [74,86],
+    'C-FOG':     [86,124], 'HADS':    [124,138], 'PRO-FOG':[138,154],
+    'PASE':     [154,180], 'MSQ':     [180,197], 'FES-I': [198,214],
+    'STAI Trait':[215,235],
+  };
+  const flags = {};
+  for (const [scale,[s,e]] of Object.entries(ranges)) {
+    let nMiss=0, nTotal=0;
+    for (let c=s;c<e;c++) { nTotal++; if (isNaN2(toNum(vrow[c]))) nMiss++; }
+    const pct = Math.round(nMiss/nTotal*1000)/10;
+    flags[scale] = { nTotal, nMiss, pct,
+      status: nMiss===0 ? 'COMPLETE' : (pct<=15 ? 'MINOR' : 'MAJOR') };
+  }
+  return flags;
+}
+
+function scoreParticipant(vrow, lrow) {
+  const scores = {};
+  Object.assign(scores, scoreDemographics(vrow,lrow));
+  Object.assign(scores, scoreNFOGQ(vrow));
+  Object.assign(scores, scorePDQ39(vrow));
+  Object.assign(scores, scorePAS(vrow));
+  Object.assign(scores, scoreCFOG(vrow));
+  Object.assign(scores, scoreHADS(vrow));
+  Object.assign(scores, scorePROFOG(vrow));
+  Object.assign(scores, scorePASE(vrow));
+  Object.assign(scores, scoreMSQ(vrow));
+  Object.assign(scores, scoreFESI(vrow));
+  Object.assign(scores, scoreSTAITrait(vrow));
+  scores.Caffeine_Cups_Per_Day = toNum(vrow[235]);
+  return scores;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// EXCEL OUTPUT
+// ─────────────────────────────────────────────────────────────────────────────
+const CLR_NAV  = '1F3864';
+const CLR_BLU  = '2E75B6';
+const CLR_PAL  = 'D6E4F0';
+const CLR_ALT  = 'F2F7FB';
+const CLR_OK   = 'E2EFDA';
+const CLR_WARN = 'FFE699';
+const CLR_ERR  = 'FFCCCC';
+const CLR_WHT  = 'FFFFFF';
+
+function xlsxCell(value, bold=false, bgColor=null, fgColor='000000', fontSize=10,
+                  hAlign='center', wrapText=false) {
+  const cell = { v: value ?? '', t: typeof value === 'number' ? 'n' : 's' };
+  cell.s = {
+    font: { name:'Arial', sz: fontSize, bold, color:{ rgb: fgColor } },
+    fill: bgColor ? { fgColor:{ rgb: bgColor }, patternType:'solid' } : { patternType:'none' },
+    alignment: { horizontal: hAlign, vertical:'center', wrapText },
+    border: {
+      top:    {style:'thin', color:{rgb:'B8CCE4'}},
+      bottom: {style:'thin', color:{rgb:'B8CCE4'}},
+      left:   {style:'thin', color:{rgb:'B8CCE4'}},
+      right:  {style:'thin', color:{rgb:'B8CCE4'}},
+    }
+  };
+  return cell;
+}
+
+function wsSetCell(ws, r, c, cell) {
+  const ref = XLSX.utils.encode_cell({r,c});
+  ws[ref] = cell;
+  if (!ws['!ref']) ws['!ref'] = ref;
+  else {
+    const range = XLSX.utils.decode_range(ws['!ref']);
+    range.e.r = Math.max(range.e.r, r);
+    range.e.c = Math.max(range.e.c, c);
+    ws['!ref'] = XLSX.utils.encode_range(range);
+  }
+}
+
+function addMerge(ws, r1,c1,r2,c2) {
+  if (!ws['!merges']) ws['!merges'] = [];
+  ws['!merges'].push({s:{r:r1,c:c1},e:{r:r2,c:c2}});
+}
+
+function buildScoresSheet(allScores, pids) {
+  const ws = {};
+  const groups = [
+    ['Demographics',  ['Participant_ID','Gender','Age','Symptom_Onset','Formal_Diagnosis','Date_Completed','Duration_min']],
+    ['NFOG-Q',        ['NFOG_Q_Total','NFOG_Q_FOG_Present','NFOG_Q_Missing_Items']],
+    ['PDQ-39',        ['PDQ39_Mobility','PDQ39_ADL','PDQ39_Emotional','PDQ39_Stigma','PDQ39_Social','PDQ39_Cognition','PDQ39_Communication','PDQ39_Bodily','PDQ39_SI','PDQ39_Missing_Items']],
+    ['PAS',           ['PAS_Persistent','PAS_Episodic','PAS_Avoidance','PAS_Total']],
+    ['C-FOG',         ['CFOG_Has_FOG','CFOG_Frequency']],
+    ['HADS',          ['HADS_Anxiety','HADS_Depression']],
+    ['PRO-FOG',       ['PRO_FOG_Total','PRO_FOG_Missing']],
+    ['PASE',          ['PASE_Total']],
+    ['MSQ',           ['MSQ_ActsOutDreams','MSQ_LegsTwitch','MSQ_RestlessLegs','MSQ_Sleepwalking','MSQ_SnortChoke','MSQ_StopBreathing','MSQ_LegCramps','MSQ_Alertness_0to10']],
+    ['FES-I',         ['FES_I_Total','FES_I_Missing']],
+    ['STAI Trait',    ['STAI_Trait_Total','STAI_Trait_Missing']],
+    ['Caffeine',      ['Caffeine_Cups_Per_Day']],
+  ];
+
+  const ranges = {
+    NFOG_Q_Total:'0–28', PDQ39_SI:'0–100', PDQ39_Mobility:'0–100',
+    PDQ39_ADL:'0–100', PDQ39_Emotional:'0–100', PDQ39_Stigma:'0–100',
+    PDQ39_Social:'0–100', PDQ39_Cognition:'0–100',
+    PDQ39_Communication:'0–100', PDQ39_Bodily:'0–100',
+    PAS_Persistent:'0–20', PAS_Episodic:'0–16', PAS_Avoidance:'0–12',
+    PAS_Total:'0–48', HADS_Anxiety:'0–21', HADS_Depression:'0–21',
+    PRO_FOG_Total:'0–64', FES_I_Total:'16–64',
+    STAI_Trait_Total:'20–80', MSQ_Alertness_0to10:'0–10', PASE_Total:'0–400+',
+  };
+
+  const flatCols = []; const colGroup = [];
+  let col = 0;
+  for (const [gname, cols] of groups) {
+    addMerge(ws, 0, col, 0, col+cols.length-1);
+    wsSetCell(ws,0,col, xlsxCell(gname,true,CLR_BLU,'FFFFFF',10));
+    for (let k=col+1;k<col+cols.length;k++) wsSetCell(ws,0,k,xlsxCell('',false,CLR_BLU));
+    for (const c of cols) { flatCols.push(c); colGroup.push(gname); }
+    col += cols.length;
+  }
+
+  for (let j=0;j<flatCols.length;j++) {
+    const bg = colGroup[j]==='Demographics' ? CLR_NAV : CLR_BLU;
+    wsSetCell(ws,1,j, xlsxCell(flatCols[j].replace(/_/g,' '),true,bg,'FFFFFF',9,undefined,true));
+    wsSetCell(ws,2,j, xlsxCell(ranges[flatCols[j]]||'',false,'E9EFF7','1F3864',8));
+  }
+
+  for (let ri=0;ri<allScores.length;ri++) {
+    const row=3+ri; const bg=ri%2===1?CLR_ALT:CLR_WHT;
+    for (let j=0;j<flatCols.length;j++) {
+      let val = allScores[ri][flatCols[j]];
+      if (val===undefined||Number.isNaN(val)) val='';
+      wsSetCell(ws,row,j, xlsxCell(val,false,bg));
+    }
+  }
+
+  ws['!cols'] = flatCols.map(c=>({wch:['Participant_ID','Gender','Date_Completed','Symptom_Onset','Formal_Diagnosis'].includes(c)?16:12}));
+  ws['!rows'] = [{hpt:20},{hpt:45},{hpt:15}];
+  return ws;
+}
+
+function buildRawSheet(ldata, codes) {
+  const ws = {};
+  const skip = new Set(['StartDate','EndDate','Status','IPAddress','Progress',
+    'Duration (in seconds)','Finished','RecordedDate','ResponseId',
+    'RecipientLastName','RecipientFirstName','RecipientEmail',
+    'ExternalReference','LocationLatitude','LocationLongitude',
+    'DistributionChannel','UserLanguage','Q1','Q2','Description']);
+
+  const keepIdx = codes.reduce((acc,c,i)=>{
+    if (!skip.has(c)||i===19) acc.push(i); return acc;
+  },[]);
+
+  addMerge(ws,0,0,0,keepIdx.length-1);
+  wsSetCell(ws,0,0,xlsxCell('Raw Qualtrics Responses — Label Format',true,CLR_NAV,'FFFFFF',12));
+
+  for (let j=0;j<keepIdx.length;j++)
+    wsSetCell(ws,1,j,xlsxCell(codes[keepIdx[j]],true,CLR_BLU,'FFFFFF',9,undefined,true));
+
+  for (let ri=0;ri<ldata.length;ri++) {
+    const row=2+ri; const bg=ri%2===1?CLR_ALT:CLR_WHT;
+    for (let j=0;j<keepIdx.length;j++) {
+      const val = ldata[ri][keepIdx[j]];
+      wsSetCell(ws,row,j,xlsxCell(val!=null&&val!==''?String(val):'',false,bg,'000000',9,'left'));
+    }
+  }
+
+  ws['!cols'] = keepIdx.map(()=>({wch:22}));
+  ws['!rows'] = [{hpt:20},{hpt:40}];
+  return ws;
+}
+
+function buildMissingSheet(missingData, pids) {
+  const ws = {};
+  const scales = ['NFOG-Q','PDQ-39','PAS','C-FOG','HADS','PRO-FOG','PASE','MSQ','FES-I','STAI Trait'];
+
+  addMerge(ws,0,0,0,1+scales.length*3-1);
+  wsSetCell(ws,0,0,xlsxCell('Missing Data Summary',true,CLR_NAV,'FFFFFF',12));
+
+  wsSetCell(ws,1,0,xlsxCell('Participant ID',true,CLR_BLU,'FFFFFF',9));
+  wsSetCell(ws,2,0,xlsxCell('Participant ID',false,CLR_PAL,'1F3864',8));
+
+  let col=1;
+  for (const s of scales) {
+    addMerge(ws,1,col,1,col+2);
+    wsSetCell(ws,1,col,  xlsxCell(s,true,CLR_BLU,'FFFFFF',9));
+    wsSetCell(ws,1,col+1,xlsxCell('',false,CLR_BLU));
+    wsSetCell(ws,1,col+2,xlsxCell('',false,CLR_BLU));
+    wsSetCell(ws,2,col,  xlsxCell('Missing N',false,CLR_PAL,'1F3864',8));
+    wsSetCell(ws,2,col+1,xlsxCell('Missing %',false,CLR_PAL,'1F3864',8));
+    wsSetCell(ws,2,col+2,xlsxCell('Status',   false,CLR_PAL,'1F3864',8));
+    col+=3;
+  }
+
+  for (let ri=0;ri<pids.length;ri++) {
+    const row=3+ri;
+    wsSetCell(ws,row,0,xlsxCell(pids[ri],true));
+    let c=1;
+    for (const s of scales) {
+      const info=missingData[ri][s]||{};
+      const st=info.status||'';
+      const bg=st==='COMPLETE'?CLR_OK:st==='MINOR'?CLR_WARN:CLR_ERR;
+      wsSetCell(ws,row,c,  xlsxCell(info.nMiss??''));
+      wsSetCell(ws,row,c+1,xlsxCell(info.pct??''));
+      wsSetCell(ws,row,c+2,xlsxCell(st,false,bg));
+      c+=3;
+    }
+  }
+
+  ws['!cols'] = [{wch:16},...scales.flatMap(()=>[{wch:10},{wch:10},{wch:12}])];
+  return ws;
+}
+
+function buildLegendSheet() {
+  const ws = {};
+  const info = [
+    ['NFOG-Q',      "New Freezing of Gait Questionnaire",              "0–28 (0 if no FOG)",    "Higher = more severe FOG"],
+    ['PDQ-39',      "Parkinson's Disease Questionnaire – 39",           "Subscales 0–100; SI 0–100","Higher = worse QoL; SI = mean of 8 subscales"],
+    ['PAS',         "Parkinson Anxiety Scale",                          "Total 0–48",            "Persistent 0–20, Episodic 0–16, Avoidance 0–12"],
+    ['C-FOG',       "Comprehensive FOG Questionnaire",                  "Binary + matrices",     "See Raw Data sheet for full trigger/strategy profiles"],
+    ['HADS',        "Hospital Anxiety and Depression Scale",            "Anxiety & Depression 0–21","0–7 Normal · 8–10 Borderline · 11–21 Abnormal"],
+    ['PRO-FOG',     "Patient-Reported Outcomes in FOG",                 "0–64",                  "Higher = greater FOG impact on daily life"],
+    ['PASE',        "Physical Activity Scale for the Elderly",          "0–400+",                "Higher = more physically active"],
+    ['MSQ',         "Mayo Sleep Questionnaire",                         "Binary + alertness 0–10","Screens for REM sleep behaviour disorder"],
+    ['FES-I',       "Falls Efficacy Scale – International",             "16–64",                 "16 = no concern · 64 = extreme concern"],
+    ['STAI Y-2',    "State-Trait Anxiety Inventory – Trait",            "20–80",                 "Higher = greater trait anxiety"],
+  ];
+
+  const headers = ['Scale','Full Name','Score Range','Interpretation'];
+  const widths  = [12,40,25,55];
+
+  addMerge(ws,0,0,0,3);
+  wsSetCell(ws,0,0,xlsxCell('Scale Reference Guide — PD_HRV Home Questionnaires',true,CLR_NAV,'FFFFFF',12));
+  for (let j=0;j<headers.length;j++) wsSetCell(ws,1,j,xlsxCell(headers[j],true,CLR_BLU,'FFFFFF',10));
+
+  for (let ri=0;ri<info.length;ri++) {
+    const row=2+ri; const bg=ri%2===1?CLR_ALT:CLR_WHT;
+    info[ri].forEach((v,j)=>wsSetCell(ws,row,j,xlsxCell(v,false,bg,'000000',9,'left',true)));
+  }
+
+  ws['!cols'] = widths.map(w=>({wch:w}));
+  ws['!rows'] = [{hpt:22},{hpt:18},...info.map(()=>({hpt:28}))];
+  return ws;
+}
+
+function buildExcel(allScores, allMissing, pids, vParsed) {
+  const wb = XLSX.utils.book_new();
+
+  const wsScores  = buildScoresSheet(allScores, pids);
+  const wsRaw     = buildRawSheet(vParsed.data, vParsed.codes);
+  const wsMissing = buildMissingSheet(allMissing, pids);
+  const wsLegend  = buildLegendSheet();
+
+  XLSX.utils.book_append_sheet(wb, wsScores,  'Scored Scales');
+  XLSX.utils.book_append_sheet(wb, wsRaw,     'Raw Data (Labels)');
+  XLSX.utils.book_append_sheet(wb, wsMissing, 'Missing Data');
+  XLSX.utils.book_append_sheet(wb, wsLegend,  'Scale Reference');
+
+  return wb;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CLINICAL THRESHOLD HELPER (for UI cards)
+// ─────────────────────────────────────────────────────────────────────────────
+function threshClass(key, val) {
+  if (isNaN2(val)) return '';
+  const rules = {
+    HADS_Anxiety:     [[8,'thresh-mild'],[11,'thresh-high']],
+    HADS_Depression:  [[8,'thresh-mild'],[11,'thresh-high']],
+    STAI_Trait_Total: [[40,'thresh-mild'],[55,'thresh-high']],
+    PDQ39_SI:         [[25,'thresh-mild'],[50,'thresh-high']],
+    FES_I_Total:      [[28,'thresh-mild'],[44,'thresh-high']],
+    NFOG_Q_Total:     [[1,'thresh-mild'],[13,'thresh-high']],
+    PAS_Total:        [[13,'thresh-mild'],[25,'thresh-high']],
+  };
+  const threshs = rules[key];
+  if (!threshs) return '';
+  let cls = 'thresh-ok';
+  for (const [t, c] of threshs) { if (val >= t) cls = c; }
+  return cls;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// UI RENDERING
+// ─────────────────────────────────────────────────────────────────────────────
+function renderResults(allScores, allMissing, pids) {
+  const container = document.getElementById('cards-container');
+  container.innerHTML = '';
+
+  for (let i = 0; i < allScores.length; i++) {
+    const s = allScores[i];
+    const m = allMissing[i];
+
+    const block = document.createElement('div');
+    block.className = 'participant-block';
+
+    // Header
+    const hdr = document.createElement('div');
+    hdr.className = 'participant-header';
+    hdr.innerHTML = `
+      <span class="pid-badge">${s.Participant_ID||'—'}</span>
+      <div class="demo-chips">
+        ${s.Gender?`<span class="chip">${s.Gender}</span>`:''}
+        ${!isNaN2(s.Age)?`<span class="chip">Age ${s.Age}</span>`:''}
+        ${s.Formal_Diagnosis&&s.Formal_Diagnosis!='null'?`<span class="chip">Dx ${s.Formal_Diagnosis}</span>`:''}
+        ${!isNaN2(s.Duration_min)?`<span class="chip">${s.Duration_min} min</span>`:''}
+      </div>
+    `;
+    block.appendChild(hdr);
+
+    // Score cards
+    const cardDefs = [
+      { key:'NFOG_Q_Total',     label:'NFOG-Q Total',     range:'0–28' },
+      { key:'PDQ39_SI',         label:'PDQ-39 Summary Index', range:'0–100' },
+      { key:'PDQ39_Mobility',   label:'PDQ Mobility',     range:'0–100' },
+      { key:'PDQ39_Emotional',  label:'PDQ Emotional',    range:'0–100' },
+      { key:'PAS_Total',        label:'PAS Total',        range:'0–48' },
+      { key:'PAS_Persistent',   label:'PAS Persistent',   range:'0–20' },
+      { key:'PAS_Episodic',     label:'PAS Episodic',     range:'0–16' },
+      { key:'PAS_Avoidance',    label:'PAS Avoidance',    range:'0–12' },
+      { key:'HADS_Anxiety',     label:'HADS Anxiety',     range:'0–21' },
+      { key:'HADS_Depression',  label:'HADS Depression',  range:'0–21' },
+      { key:'PRO_FOG_Total',    label:'PRO-FOG Total',    range:'0–64' },
+      { key:'FES_I_Total',      label:'FES-I Total',      range:'16–64' },
+      { key:'STAI_Trait_Total', label:'STAI Trait',       range:'20–80' },
+      { key:'PASE_Total',       label:'PASE Total',       range:'0–400+' },
+      { key:'MSQ_Alertness_0to10', label:'Alertness',     range:'0–10' },
+      { key:'Caffeine_Cups_Per_Day', label:'Caffeine/day',range:'cups' },
+    ];
+
+    const grid = document.createElement('div');
+    grid.className = 'scores-grid';
+
+    for (const { key, label, range } of cardDefs) {
+      const val = s[key];
+      const display = (val===undefined||isNaN2(val)) ? null : (typeof val==='number'?Math.round(val*100)/100:val);
+      const tc = display!==null ? threshClass(key, val) : '';
+
+      const card = document.createElement('div');
+      card.className = 'score-card';
+      card.innerHTML = `
+        <div class="sc-scale">${label}</div>
+        <div class="sc-value ${display===null?'na':tc}">${display!==null?display:'n/a'}</div>
+        <span class="sc-range">${range}</span>
+      `;
+      grid.appendChild(card);
+    }
+
+    block.appendChild(grid);
+
+    // Missing data pills
+    const missDiv = document.createElement('div');
+    missDiv.className = 'missing-section';
+    missDiv.innerHTML = '<div class="missing-title">Completeness</div><div class="missing-pills"></div>';
+    const pillsDiv = missDiv.querySelector('.missing-pills');
+    for (const [scale, info] of Object.entries(m)) {
+      const cls = info.status==='COMPLETE'?'miss-ok':info.status==='MINOR'?'miss-warn':'miss-bad';
+      const pill = document.createElement('span');
+      pill.className = `miss-pill ${cls}`;
+      pill.textContent = info.status==='COMPLETE' ? `✓ ${scale}` : `${scale} (${info.nMiss} missing)`;
+      pillsDiv.appendChild(pill);
+    }
+    block.appendChild(missDiv);
+    container.appendChild(block);
+  }
+
+  document.getElementById('results').classList.add('visible');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MAIN RUNNER
+// ─────────────────────────────────────────────────────────────────────────────
+let lastWB = null;
+
+async function runProcessor() {
+  const btn = document.getElementById('btn-run');
+  btn.classList.add('loading');
+  btn.disabled = true;
+  document.getElementById('results').classList.remove('visible');
+  document.getElementById('cards-container').innerHTML = '';
+
+  try {
+    log('Reading Values file…', 'info');
+    const vArr = await readXlsx(vFile);
+    log(`Values: ${vArr.length-2} participant(s) found`, 'ok');
+
+    log('Reading Labels file…', 'info');
+    const lArr = await readXlsx(lFile);
+    log(`Labels: ${lArr.length-2} participant(s) found`, 'ok');
+
+    const vParsed = parseQualtrics(vArr);
+    const lParsed = parseQualtrics(lArr);
+
+    const n = vParsed.data.length;
+    if (n === 0) { log('No participant data rows found.', 'err'); return; }
+    if (n !== lParsed.data.length) log(`Warning: row count mismatch (${n} vs ${lParsed.data.length})`, 'warn');
+
+    log(`Scoring ${n} participant(s)…`, 'info');
+
+    const allScores = [], allMissing = [], pids = [];
+
+    for (let i = 0; i < n; i++) {
+      const vrow = vParsed.data[i];
+      const lrow = lParsed.data[i];
+      const scores  = scoreParticipant(vrow, lrow);
+      const missing = checkMissing(vrow);
+      allScores.push(scores);
+      allMissing.push(missing);
+      pids.push(scores.Participant_ID || `P${i+1}`);
+      log(`${scores.Participant_ID||'?'} · PDQ-SI=${isNaN2(scores.PDQ39_SI)?'—':scores.PDQ39_SI} · HADS-A=${isNaN2(scores.HADS_Anxiety)?'—':scores.HADS_Anxiety} · STAI-T=${isNaN2(scores.STAI_Trait_Total)?'—':scores.STAI_Trait_Total}`, 'ok');
+    }
+
+    log('Building Excel workbook…', 'info');
+    lastWB = buildExcel(allScores, allMissing, pids, lParsed);
+    log('✓ Done — click Download to save', 'ok');
+
+    renderResults(allScores, allMissing, pids);
+
+  } catch(err) {
+    log(`Error: ${err.message}`, 'err');
+    console.error(err);
+  } finally {
+    btn.classList.remove('loading');
+    btn.disabled = false;
+  }
+}
+
+function downloadExcel() {
+  if (!lastWB) return;
+  const date = new Date().toISOString().slice(0,10).replace(/-/g,'');
+  XLSX.writeFile(lastWB, `PD_HRV_Scored_${date}.xlsx`, { bookType:'xlsx', type:'binary', cellStyles:true });
+}
+</script>
+</body>
+</html>
