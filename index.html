@@ -135,18 +135,18 @@ canvas.rc{max-width:360px;width:100%}
 
   <div class="drop-grid">
     <div class="drop-zone" id="zv" onclick="document.getElementById('iv').click()">
-      <input type="file" id="iv" accept=".xlsx,.xls">
+      <input type="file" id="iv" accept=".xlsx,.xls,.csv">
       <span class="di">📊</span>
       <div class="dl">File 1 · Values</div>
-      <div class="dt">_Values.xlsx</div>
+      <div class="dt">_Values.csv</div>
       <div class="ds">Numeric Qualtrics export</div>
       <div class="dfn" id="fnv"></div>
     </div>
     <div class="drop-zone" id="zl" onclick="document.getElementById('il').click()">
-      <input type="file" id="il" accept=".xlsx,.xls">
+      <input type="file" id="il" accept=".xlsx,.xls,.csv">
       <span class="di">🏷️</span>
       <div class="dl">File 2 · Labels</div>
-      <div class="dt">_17.22.xlsx</div>
+      <div class="dt">_Labels.csv</div>
       <div class="ds">Text labels Qualtrics export</div>
       <div class="dfn" id="fnl"></div>
     </div>
@@ -333,7 +333,7 @@ function lg(msg,t='in'){
 }
 
 // ════════════════════════════════════════════════════════════════
-// XLSX PARSE
+// XLSX/CSV PARSE
 // ════════════════════════════════════════════════════════════════
 function readXlsx(f){
   return new Promise((res,rej)=>{
@@ -366,7 +366,7 @@ function sSTAI(r){const it=[];for(let c=215;c<235;c++)it.push(n2(r[c]));const po
 function sMSQ(r){return{MSQ_ActsOutDreams:n2(r[180]),MSQ_LegsTwitch:n2(r[186]),MSQ_RestlessLegs:n2(r[187]),MSQ_Sleepwalking:n2(r[191]),MSQ_SnortChoke:n2(r[192]),MSQ_StopBreathing:n2(r[193]),MSQ_LegCramps:n2(r[195]),MSQ_Alertness_0to10:n2(r[196])}}
 function sDemog(vr,lr){const gm={1:'Man',2:'Woman',3:'Non-binary',4:'Self-describe'};const gv=n2(vr[20]);const dur=n2(vr[5]);return{Participant_ID:String(lr[19]||''),Gender:gm[gv]||'',Age:n2(vr[22]),Symptom_Onset:String(lr[23]||''),Formal_Diagnosis:String(lr[24]||''),Date_Completed:vr[0]?String(vr[0]).slice(0,10):'',Duration_min:ni(dur)?NaN:Math.round(dur/60*10)/10}}
 
-// FIXED CFOG FUNCTION
+// FIXED CFOG FUNCTION (Now ignores 999 missing values)
 function sCFOG(r){
   const h = n2(r[86]);
   // In Qualtrics: 0 = Yes, 1 = No for this survey
@@ -376,7 +376,12 @@ function sCFOG(r){
   // Extract Triggers (Q9_1 to Q9_12 are at indices 93 to 104)
   const t = [];
   for(let i=93; i<=104; i++){
-    t.push(ni(n2(r[i])) ? NaN : n2(r[i]));
+    let val = n2(r[i]);
+    // If the value is missing OR is Qualtrics' 999 code, treat it as NaN
+    if (ni(val) || val === 999) {
+      val = NaN;
+    }
+    t.push(val);
   }
 
   // Calculate Cluster Phenotype Sub-scores
@@ -592,7 +597,7 @@ function mg(s,r1,c1,r2,c2){if(!s['!merges'])s['!merges']=[];s['!merges'].push({s
 
 function buildScores(scores,pids){
   const s={};
-  // UPDATED: Added new CFOG columns
+  // Includes CFOG Clusters and handles missing values 
   const groups=[
     ['Demographics',['Participant_ID','Gender','Age','Symptom_Onset','Formal_Diagnosis','Date_Completed','Duration_min']],
     ['NFOG-Q',['NFOG_Q_Total','NFOG_Q_FOG_Present','NFOG_Q_Missing']],
