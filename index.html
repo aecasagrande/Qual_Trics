@@ -173,8 +173,7 @@ canvas.rc{max-width:360px;width:100%}
 
 <script>
 // ════════════════════════════════════════════════════════════════
-// CLINICAL CUTOFF DEFINITIONS  (evidence-based, PD literature)
-// zones: [{label, color hex, from, to, description, cite}]
+// CLINICAL CUTOFF DEFINITIONS 
 // ════════════════════════════════════════════════════════════════
 const CUT = {
   HADS_Anxiety:{
@@ -284,7 +283,7 @@ const CUT = {
     label:'PASE – Physical Activity', max:360, min:0,
     cite:'Washburn et al. 1993; PD mean ~80–120: van Nimwegen et al. 2010',
     zones:[
-      {l:'Very Low',  c:'#ef4444', f:0,   t:60,  d:'0–59: Very low activity — concern in PD context'},
+      {l:'Very Low',  c:'#ef4444', f:0,  t:60,  d:'0–59: Very low activity — concern in PD context'},
       {l:'Low',       c:'#f97316', f:60,  t:100, d:'60–99: Below PD population average'},
       {l:'Average',   c:'#f59e0b', f:100, t:160, d:'100–159: Average activity level for PD'},
       {l:'Active',    c:'#84cc16', f:160, t:220, d:'160–219: Above average — well-managed activity'},
@@ -365,8 +364,39 @@ function sPASE(r){const fw={1:0,2:.11,3:.43,4:1};const hw={1:.5,2:1.5,3:3,4:5};c
 function sFESI(r){const it=[];for(let c=198;c<214;c++)it.push(n2(r[c]));const nm=it.filter(x=>ni(x)).length;return{FES_I_Total:nm<=3?ns(it):NaN,FES_I_Missing:nm}}
 function sSTAI(r){const it=[];for(let c=215;c<235;c++)it.push(n2(r[c]));const pos=new Set([1,3,6,7,10,13,14,16,19]);const cv=it.map((x,i)=>ni(x)?NaN:(pos.has(i+1)?x:5-x));const nm=cv.filter(x=>ni(x)).length;return{STAI_Trait_Total:nm<=4?ns(cv):NaN,STAI_Trait_Missing:nm}}
 function sMSQ(r){return{MSQ_ActsOutDreams:n2(r[180]),MSQ_LegsTwitch:n2(r[186]),MSQ_RestlessLegs:n2(r[187]),MSQ_Sleepwalking:n2(r[191]),MSQ_SnortChoke:n2(r[192]),MSQ_StopBreathing:n2(r[193]),MSQ_LegCramps:n2(r[195]),MSQ_Alertness_0to10:n2(r[196])}}
-function sCFOG(r){const h=n2(r[86]);return{CFOG_Has_FOG:h===1?0:h===2?1:NaN,CFOG_Frequency:h===2?n2(r[87]):h===1?0:NaN}}
 function sDemog(vr,lr){const gm={1:'Man',2:'Woman',3:'Non-binary',4:'Self-describe'};const gv=n2(vr[20]);const dur=n2(vr[5]);return{Participant_ID:String(lr[19]||''),Gender:gm[gv]||'',Age:n2(vr[22]),Symptom_Onset:String(lr[23]||''),Formal_Diagnosis:String(lr[24]||''),Date_Completed:vr[0]?String(vr[0]).slice(0,10):'',Duration_min:ni(dur)?NaN:Math.round(dur/60*10)/10}}
+
+// FIXED CFOG FUNCTION
+function sCFOG(r){
+  const h = n2(r[86]);
+  // In Qualtrics: 0 = Yes, 1 = No for this survey
+  const hasFOG = (h === 0) ? 1 : (h === 1) ? 0 : NaN;
+  const freq = (h === 0) ? n2(r[87]) : (h === 1) ? 0 : NaN;
+
+  // Extract Triggers (Q9_1 to Q9_12 are at indices 93 to 104)
+  const t = [];
+  for(let i=93; i<=104; i++){
+    t.push(ni(n2(r[i])) ? NaN : n2(r[i]));
+  }
+
+  // Calculate Cluster Phenotype Sub-scores
+  // Cluster 1 (Motor): Items 1, 2, 7, 9, 10
+  const c1 = ns([t[0], t[1], t[6], t[8], t[9]]);
+  // Cluster 2 (Anxious): Items 3, 4, 5, 6
+  const c2 = ns([t[2], t[3], t[4], t[5]]);
+  // Cluster 3 (Sensory-Attention): Items 8, 11, 12
+  const c3 = ns([t[7], t[10], t[11]]);
+
+  return {
+    CFOG_Has_FOG: hasFOG,
+    CFOG_Frequency: freq,
+    CFOG_Triggers_Total: hasFOG === 1 ? ns(t) : (hasFOG === 0 ? 0 : NaN),
+    CFOG_Cluster1_Motor: hasFOG === 1 ? c1 : (hasFOG === 0 ? 0 : NaN),
+    CFOG_Cluster2_Anxious: hasFOG === 1 ? c2 : (hasFOG === 0 ? 0 : NaN),
+    CFOG_Cluster3_Sensory: hasFOG === 1 ? c3 : (hasFOG === 0 ? 0 : NaN)
+  }
+}
+
 function scorePt(vr,lr){const s={};Object.assign(s,sDemog(vr,lr),sNFOGQ(vr),sPDQ39(vr),sPAS(vr),sCFOG(vr),sHADS(vr),sPROFOG(vr),sPASE(vr),sMSQ(vr),sFESI(vr),sSTAI(vr));s.Caffeine=n2(vr[235]);return s}
 
 function chkMissing(r){const rng={'NFOG-Q':[26,35],'PDQ-39':[35,74],'PAS':[74,86],'C-FOG':[86,124],'HADS':[124,138],'PRO-FOG':[138,154],'PASE':[154,180],'MSQ':[180,197],'FES-I':[198,214],'STAI Trait':[215,235]};const f={};for(const[sc,[s,e]]of Object.entries(rng)){let nm=0,nt=0;for(let c=s;c<e;c++){nt++;if(ni(n2(r[c])))nm++}f[sc]={nt,nm,pct:Math.round(nm/nt*1000)/10,status:nm===0?'COMPLETE':nm/nt<=.15?'MINOR':'MAJOR'}}return f}
@@ -388,7 +418,6 @@ function makeBar(key, val){
   const range=max-min;
   const hasVal=!ni(val)&&!isNaN(val);
 
-  // zone strips
   const zoneHtml=zones.map(z=>{
     const w=((z.t-z.f)/range*100).toFixed(3);
     return `<div class="bzone" style="width:${w}%;background:${z.c};opacity:.38"
@@ -396,10 +425,8 @@ function makeBar(key, val){
       onmousemove="mvTip(event)" onmouseleave="hideTip()"></div>`;
   }).join('');
 
-  // tick marks at boundaries
   const ticks=zones.slice(1).map(z=>`<div class="btick" style="left:${((z.f-min)/range*100).toFixed(3)}%"></div>`).join('');
 
-  // fill colour from zone
   let fillPct=0,fillCol='rgba(255,255,255,.6)';
   if(hasVal){
     const cl=Math.max(min,Math.min(max,val));
@@ -408,7 +435,6 @@ function makeBar(key, val){
     if(val>=max) fillCol=zones[zones.length-1].c;
   }
 
-  // zone label strip
   const zlHtml=zones.map(z=>{
     const w=((z.t-z.f)/range*100).toFixed(3);
     return `<div class="zlitem" style="width:${w}%;color:${z.c}88">${z.l}</div>`;
@@ -447,32 +473,26 @@ function makeRadar(scores){
     const cx=180,cy=152,R=108;
     const ang=i=>Math.PI*2/n*i-Math.PI/2;
 
-    // Background rings
     [20,40,60,80,100].forEach(pct=>{
       ctx.beginPath();
       for(let i=0;i<n;i++){const a=ang(i),r=R*pct/100;i===0?ctx.moveTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r):ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r)}
       ctx.closePath();ctx.strokeStyle='rgba(255,255,255,.07)';ctx.lineWidth=1;ctx.stroke();
     });
 
-    // Reference ring at 50 (midpoint)
     ctx.beginPath();
     for(let i=0;i<n;i++){const a=ang(i),r=R*.5;i===0?ctx.moveTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r):ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r)}
     ctx.closePath();ctx.strokeStyle='rgba(245,158,11,.35)';ctx.lineWidth=1.5;ctx.stroke();
 
-    // Ring labels
     ctx.fillStyle='rgba(99,112,128,.55)';ctx.font='8px DM Mono,monospace';ctx.textAlign='center';
     [20,40,60,80,100].forEach(p=>{ctx.fillText(p,cx+2,cy-R*p/100+3)});
 
-    // Spokes
     for(let i=0;i<n;i++){const a=ang(i);ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(a)*R,cy+Math.sin(a)*R);ctx.strokeStyle='rgba(255,255,255,.09)';ctx.lineWidth=1;ctx.stroke()}
 
-    // Filled polygon
     const pts=vals.map((v,i)=>{const pct=(ni(v)?0:v)/100;const a=ang(i);return[cx+Math.cos(a)*R*pct,cy+Math.sin(a)*R*pct]});
     ctx.beginPath();pts.forEach(([x,y],i)=>i===0?ctx.moveTo(x,y):ctx.lineTo(x,y));
     ctx.closePath();ctx.fillStyle='rgba(79,163,232,.15)';ctx.fill();
     ctx.strokeStyle='rgba(79,163,232,.65)';ctx.lineWidth=2;ctx.stroke();
 
-    // Data points
     pts.forEach(([x,y],i)=>{
       if(ni(vals[i]))return;
       ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);
@@ -480,14 +500,12 @@ function makeRadar(scores){
       ctx.strokeStyle='#0c1017';ctx.lineWidth=1.5;ctx.stroke();
     });
 
-    // Axis labels
     PDQ_LBLS.forEach((lb,i)=>{
       const a=ang(i);const pad=R+20;const x=cx+Math.cos(a)*pad,y=cy+Math.sin(a)*pad;
       ctx.fillStyle='#dde6f0';ctx.font='10px DM Mono,monospace';
       ctx.textAlign=x>cx+4?'left':x<cx-4?'right':'center';
       ctx.textBaseline=y>cy+4?'top':y<cy-4?'bottom':'middle';
       ctx.fillText(lb,x,y);
-      // Score label
       if(!ni(vals[i])){
         const sv=Math.round(vals[i]);
         const sx=cx+Math.cos(a)*(R*.75),sy=cy+Math.sin(a)*(R*.75);
@@ -497,7 +515,6 @@ function makeRadar(scores){
       }
     });
 
-    // Legend
     ctx.fillStyle='rgba(245,158,11,.5)';ctx.font='8px DM Mono,monospace';
     ctx.textAlign='left';ctx.textBaseline='top';
     ctx.fillText('— = 50 midpoint reference',cx-R,cy+R+14);
@@ -519,7 +536,6 @@ function renderCards(allScores,allMissing,pids){
     const m=allMissing[i];
     const card=document.createElement('div');card.className='pcard';
 
-    // Header
     const hdr=document.createElement('div');hdr.className='phdr';
     hdr.innerHTML=`<span class="pid">${s.Participant_ID||'—'}</span><div class="chips">
       ${s.Gender?`<span class="chip">${s.Gender}</span>`:''}
@@ -529,7 +545,6 @@ function renderCards(allScores,allMissing,pids){
     </div>`;
     card.appendChild(hdr);
 
-    // Charts
     const csec=document.createElement('div');csec.className='csec';
 
     function grp(title,keys){
@@ -542,7 +557,6 @@ function renderCards(allScores,allMissing,pids){
     grp('Anxiety & Mood',['HADS_Anxiety','HADS_Depression','STAI_Trait_Total','PAS_Total','PAS_Persistent','PAS_Episodic','PAS_Avoidance']);
     grp('Freezing of Gait',['NFOG_Q_Total','PRO_FOG_Total']);
 
-    // QoL — bar + radar
     const qolGrp=document.createElement('div');qolGrp.className='cgrp';
     qolGrp.innerHTML='<div class="cgrp-title">Quality of Life (PDQ-39) & Falls</div>';
     const siBar=makeBar('PDQ39_SI',s.PDQ39_SI);if(siBar)qolGrp.appendChild(siBar);
@@ -553,7 +567,6 @@ function renderCards(allScores,allMissing,pids){
     grp('Physical Activity & Sleep',['PASE_Total','MSQ_Alertness_0to10']);
     card.appendChild(csec);
 
-    // Missing pills
     const ms=document.createElement('div');ms.className='msec';
     ms.innerHTML='<div class="mtitle">Completeness</div><div class="mpills"></div>';
     const pp=ms.querySelector('.mpills');
@@ -570,7 +583,7 @@ function renderCards(allScores,allMissing,pids){
 }
 
 // ════════════════════════════════════════════════════════════════
-// EXCEL OUTPUT  (same sheets as before)
+// EXCEL OUTPUT 
 // ════════════════════════════════════════════════════════════════
 const CN={N:'1F3864',B:'2E75B6',P:'D6E4F0',A:'F2F7FB',O:'E2EFDA',W:'FFE699',E:'FFCCCC',H:'FFFFFF'};
 function xc(v,bold=false,bg=null,fg='000000',sz=10,ha='center',wrap=false){const c={v:v??'',t:typeof v==='number'?'n':'s'};c.s={font:{name:'Arial',sz,bold,color:{rgb:fg}},fill:bg?{fgColor:{rgb:bg},patternType:'solid'}:{patternType:'none'},alignment:{horizontal:ha,vertical:'center',wrapText:wrap},border:{top:{style:'thin',color:{rgb:'B8CCE4'}},bottom:{style:'thin',color:{rgb:'B8CCE4'}},left:{style:'thin',color:{rgb:'B8CCE4'}},right:{style:'thin',color:{rgb:'B8CCE4'}}}};return c}
@@ -579,8 +592,22 @@ function mg(s,r1,c1,r2,c2){if(!s['!merges'])s['!merges']=[];s['!merges'].push({s
 
 function buildScores(scores,pids){
   const s={};
-  const groups=[['Demographics',['Participant_ID','Gender','Age','Symptom_Onset','Formal_Diagnosis','Date_Completed','Duration_min']],['NFOG-Q',['NFOG_Q_Total','NFOG_Q_FOG_Present','NFOG_Q_Missing']],['PDQ-39',['PDQ39_Mobility','PDQ39_ADL','PDQ39_Emotional','PDQ39_Stigma','PDQ39_Social','PDQ39_Cognition','PDQ39_Communication','PDQ39_Bodily','PDQ39_SI','PDQ39_Missing']],['PAS',['PAS_Persistent','PAS_Episodic','PAS_Avoidance','PAS_Total']],['C-FOG',['CFOG_Has_FOG','CFOG_Frequency']],['HADS',['HADS_Anxiety','HADS_Depression']],['PRO-FOG',['PRO_FOG_Total','PRO_FOG_Missing']],['PASE',['PASE_Total']],['MSQ',['MSQ_ActsOutDreams','MSQ_LegsTwitch','MSQ_RestlessLegs','MSQ_Sleepwalking','MSQ_SnortChoke','MSQ_StopBreathing','MSQ_LegCramps','MSQ_Alertness_0to10']],['FES-I',['FES_I_Total','FES_I_Missing']],['STAI Trait',['STAI_Trait_Total','STAI_Trait_Missing']],['Caffeine',['Caffeine']]];
-  const rngs={NFOG_Q_Total:'0–28',PDQ39_SI:'0–100',PDQ39_Mobility:'0–100',PDQ39_ADL:'0–100',PDQ39_Emotional:'0–100',PDQ39_Stigma:'0–100',PDQ39_Social:'0–100',PDQ39_Cognition:'0–100',PDQ39_Communication:'0–100',PDQ39_Bodily:'0–100',PAS_Persistent:'0–20',PAS_Episodic:'0–16',PAS_Avoidance:'0–12',PAS_Total:'0–48',HADS_Anxiety:'0–21',HADS_Depression:'0–21',PRO_FOG_Total:'0–64',FES_I_Total:'16–64',STAI_Trait_Total:'20–80',MSQ_Alertness_0to10:'0–10',PASE_Total:'0–360+'};
+  // UPDATED: Added new CFOG columns
+  const groups=[
+    ['Demographics',['Participant_ID','Gender','Age','Symptom_Onset','Formal_Diagnosis','Date_Completed','Duration_min']],
+    ['NFOG-Q',['NFOG_Q_Total','NFOG_Q_FOG_Present','NFOG_Q_Missing']],
+    ['PDQ-39',['PDQ39_Mobility','PDQ39_ADL','PDQ39_Emotional','PDQ39_Stigma','PDQ39_Social','PDQ39_Cognition','PDQ39_Communication','PDQ39_Bodily','PDQ39_SI','PDQ39_Missing']],
+    ['PAS',['PAS_Persistent','PAS_Episodic','PAS_Avoidance','PAS_Total']],
+    ['C-FOG',['CFOG_Has_FOG','CFOG_Frequency','CFOG_Triggers_Total','CFOG_Cluster1_Motor','CFOG_Cluster2_Anxious','CFOG_Cluster3_Sensory']],
+    ['HADS',['HADS_Anxiety','HADS_Depression']],
+    ['PRO-FOG',['PRO_FOG_Total','PRO_FOG_Missing']],
+    ['PASE',['PASE_Total']],
+    ['MSQ',['MSQ_ActsOutDreams','MSQ_LegsTwitch','MSQ_RestlessLegs','MSQ_Sleepwalking','MSQ_SnortChoke','MSQ_StopBreathing','MSQ_LegCramps','MSQ_Alertness_0to10']],
+    ['FES-I',['FES_I_Total','FES_I_Missing']],
+    ['STAI Trait',['STAI_Trait_Total','STAI_Trait_Missing']],
+    ['Caffeine',['Caffeine']]
+  ];
+  const rngs={NFOG_Q_Total:'0–28',PDQ39_SI:'0–100',PDQ39_Mobility:'0–100',PDQ39_ADL:'0–100',PDQ39_Emotional:'0–100',PDQ39_Stigma:'0–100',PDQ39_Social:'0–100',PDQ39_Cognition:'0–100',PDQ39_Communication:'0–100',PDQ39_Bodily:'0–100',PAS_Persistent:'0–20',PAS_Episodic:'0–16',PAS_Avoidance:'0–12',PAS_Total:'0–48',HADS_Anxiety:'0–21',HADS_Depression:'0–21',PRO_FOG_Total:'0–64',FES_I_Total:'16–64',STAI_Trait_Total:'20–80',MSQ_Alertness_0to10:'0–10',PASE_Total:'0–360+', CFOG_Triggers_Total:'0–48', CFOG_Cluster1_Motor:'0–20', CFOG_Cluster2_Anxious:'0–16', CFOG_Cluster3_Sensory:'0–12'};
   const flat=[];const cg=[];let col=0;
   groups.forEach(([gn,cols])=>{mg(s,0,col,0,col+cols.length-1);ws(s,0,col,xc(gn,true,CN.B,'FFFFFF',10));for(let k=col+1;k<col+cols.length;k++)ws(s,0,k,xc('',false,CN.B));cols.forEach(c=>{flat.push(c);cg.push(gn)});col+=cols.length});
   flat.forEach((c,j)=>{ws(s,1,j,xc(c.replace(/_/g,' '),true,cg[j]==='Demographics'?CN.N:CN.B,'FFFFFF',9,undefined,true));ws(s,2,j,xc(rngs[c]||'',false,'E9EFF7','1F3864',8))});
@@ -588,6 +615,7 @@ function buildScores(scores,pids){
   s['!cols']=flat.map(c=>({wch:['Participant_ID','Gender','Date_Completed','Symptom_Onset','Formal_Diagnosis'].includes(c)?16:12}));
   s['!rows']=[{hpt:20},{hpt:44},{hpt:14}];return s;
 }
+
 function buildRaw(ldata,codes){
   const s={};const skip=new Set(['StartDate','EndDate','Status','IPAddress','Progress','Duration (in seconds)','Finished','RecordedDate','ResponseId','RecipientLastName','RecipientFirstName','RecipientEmail','ExternalReference','LocationLatitude','LocationLongitude','DistributionChannel','UserLanguage','Q1','Q2','Description']);
   const keep=codes.reduce((a,c,i)=>{if(!skip.has(c)||i===19)a.push(i);return a},[]);
@@ -616,9 +644,7 @@ function buildRef(){
     ['MSQ','Mayo Sleep Questionnaire','Binary + alertness 0–10','Screens RBD, restless legs, sleep apnea. Alertness: 0 = sleep all day, 10 = fully awake.','Boeve et al. 2002'],
     ['FES-I','Falls Efficacy Scale – International','16–64','16–19: low concern · 20–27: moderate · 28–64: high (fall risk management indicated). Validated in PD.','Delbaere et al. 2010; Mehdizadeh et al. 2019'],
     ['STAI Y-2','STAI Trait Anxiety Inventory','20–80','Higher = greater trait anxiety. PD norms ≈ 40–50. Reverse-scored positive items.','Spielberger 1983; Ehgoetz Martens et al. 2016'],
-    ['C-FOG','Comprehensive FOG Questionnaire','Binary + matrices','Detailed trigger and strategy profiles — see Raw Data sheet.','King et al. 2012'],
-    ['STAI Y-1','STAI State (in-lab only)','20–80','Completed Pre-OFF and Pre-ON during in-lab session. Not in home survey.','—'],
-    ['SSQ','Simulator Sickness Questionnaire (in-lab)','Weighted subscores','Completed Pre/Post VR. Not in home survey.','Kennedy et al. 1993'],
+    ['C-FOG','Comprehensive FOG Questionnaire','Binary + Sub-scores','Phenotype mapping (Cluster 1: Motor, Cluster 2: Anxious, Cluster 3: Sensory).','King et al. 2012'],
   ];
   const hdrs=['Scale','Full Name','Score Range','Cutoff Interpretation','Reference'];const wids=[10,36,16,54,32];
   mg(s,0,0,0,4);ws(s,0,0,xc('Scale Reference & Clinical Cutoffs — PD_HRV Home Questionnaires',true,CN.N,'FFFFFF',12));
@@ -659,7 +685,7 @@ async function run(){
       const sc=scorePt(vP.data[i],lP.data[i]);
       const ms=chkMissing(vP.data[i]);
       allScores.push(sc);allMissing.push(ms);pids.push(sc.Participant_ID||`P${i+1}`);
-      lg(`${sc.Participant_ID||'?'} · PDQ-SI=${ni(sc.PDQ39_SI)?'—':sc.PDQ39_SI} · HADS-A=${ni(sc.HADS_Anxiety)?'—':sc.HADS_Anxiety} · PAS=${ni(sc.PAS_Total)?'—':sc.PAS_Total} · STAI-T=${ni(sc.STAI_Trait_Total)?'—':sc.STAI_Trait_Total}`,'ok');
+      lg(`${sc.Participant_ID||'?'} · PDQ-SI=${ni(sc.PDQ39_SI)?'—':sc.PDQ39_SI} · CFOG Triggers=${ni(sc.CFOG_Triggers_Total)?'—':sc.CFOG_Triggers_Total}`,'ok');
     }
     lg('Building Excel…');
     lastWB=buildExcel(allScores,allMissing,pids,lP);
