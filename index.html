@@ -681,14 +681,22 @@ async function run(){
     lg('Reading Labels file…');
     const lArr=await readXlsx(lF);lg(`Labels: ${lArr.length-2} participant(s) detected`,'ok');
     const vP=parseQ(vArr),lP=parseQ(lArr);
-    const N=vP.data.length;
+    
+    // Determine the maximum number of rows between the two files
+    const N=Math.max(vP.data.length, lP.data.length);
     if(!N){lg('No data rows found — check file format.','er');return}
-    if(N!==lP.data.length)lg(`Row count mismatch: Values=${N}, Labels=${lP.data.length}`,'wn');
+    if(vP.data.length !== lP.data.length) lg(`Row count mismatch: Values=${vP.data.length}, Labels=${lP.data.length}. Missing rows will be left blank.`,'wn');
+    
     lg(`Scoring ${N} participant(s)…`);
     const allScores=[],allMissing=[],pids=[];
     for(let i=0;i<N;i++){
-      const sc=scorePt(vP.data[i],lP.data[i]);
-      const ms=chkMissing(vP.data[i]);
+      // SAFELY handle missing rows by falling back to empty arrays []
+      const vRow = vP.data[i] || [];
+      const lRow = lP.data[i] || [];
+      
+      const sc=scorePt(vRow, lRow);
+      const ms=chkMissing(vRow);
+      
       allScores.push(sc);allMissing.push(ms);pids.push(sc.Participant_ID||`P${i+1}`);
       lg(`${sc.Participant_ID||'?'} · PDQ-SI=${ni(sc.PDQ39_SI)?'—':sc.PDQ39_SI} · CFOG Triggers=${ni(sc.CFOG_Triggers_Total)?'—':sc.CFOG_Triggers_Total}`,'ok');
     }
@@ -699,8 +707,7 @@ async function run(){
   }catch(err){lg(`Error: ${err.message}`,'er');console.error(err)}
   finally{btn.classList.remove('loading');btn.disabled=false}
 }
-
-function dlExcel(){
+  function dlExcel(){
   if(!lastWB)return;
   XLSX.writeFile(lastWB,`PD_HRV_Scored_${new Date().toISOString().slice(0,10).replace(/-/g,'')}.xlsx`,{bookType:'xlsx',type:'binary',cellStyles:true});
 }
