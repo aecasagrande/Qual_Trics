@@ -17,13 +17,11 @@
 body{background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;min-height:100vh;overflow-x:hidden}
 body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(79,163,232,.03)1px,transparent 1px),linear-gradient(90deg,rgba(79,163,232,.03)1px,transparent 1px);background-size:44px 44px;pointer-events:none}
 .wrap{position:relative;z-index:1;max-width:920px;margin:0 auto;padding:60px 24px 100px}
-
 /* header */
 .badge{display:inline-block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);border:1px solid rgba(79,163,232,.4);border-radius:3px;padding:3px 9px;margin-bottom:18px}
 h1{font-family:'Fraunces',serif;font-size:clamp(2.2rem,5vw,3.4rem);font-weight:700;line-height:1.05;letter-spacing:-.025em;margin-bottom:10px}
 h1 em{color:var(--accent);font-style:italic;font-weight:300}
 .subtitle{font-size:12px;color:var(--muted);line-height:1.8;max-width:500px;margin-bottom:52px}
-
 /* drop */
 .drop-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:28px}
 .drop-zone{border:1.5px dashed var(--border);border-radius:10px;padding:28px 18px;text-align:center;cursor:pointer;background:var(--surf);transition:border-color .2s,background .2s,transform .15s;position:relative;overflow:hidden}
@@ -38,7 +36,6 @@ h1 em{color:var(--accent);font-style:italic;font-weight:300}
 .ds{font-size:11px;color:var(--muted)}
 .dfn{margin-top:8px;font-size:11px;color:var(--green);word-break:break-all}
 input[type="file"]{display:none}
-
 /* button */
 .btn-wrap{text-align:center;margin-bottom:36px}
 .btn{display:inline-flex;align-items:center;gap:10px;background:var(--accent);color:#060d14;border:none;border-radius:8px;padding:13px 34px;font-family:'DM Mono',monospace;font-size:13px;font-weight:500;letter-spacing:.04em;cursor:pointer;transition:background .2s,transform .15s,box-shadow .2s}
@@ -49,14 +46,12 @@ input[type="file"]{display:none}
 @keyframes rot{to{transform:rotate(360deg)}}
 @keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @keyframes fi{from{opacity:0}to{opacity:1}}
-
 /* log */
 .log{background:var(--surf);border:1px solid var(--border);border-radius:9px;padding:18px;font-size:11px;line-height:2;min-height:72px;max-height:220px;overflow-y:auto;display:none;margin-bottom:22px}
 .log.on{display:block;animation:fi .3s ease}
 .ll{display:flex;gap:10px;align-items:baseline}
 .lt{color:var(--muted);font-size:9px;flex-shrink:0}
 .lok{color:var(--green)}.lin{color:var(--accent)}.lwn{color:var(--amber)}.ler{color:var(--red)}
-
 /* results */
 .results{display:none;animation:up .4s ease}
 .results.on{display:block}
@@ -64,19 +59,16 @@ input[type="file"]{display:none}
 .rt{font-family:'Fraunces',serif;font-size:1.35rem;font-weight:300}
 .btn-dl{display:inline-flex;align-items:center;gap:8px;background:var(--green);color:#050e08;border:none;border-radius:7px;padding:9px 20px;font-family:'DM Mono',monospace;font-size:11px;font-weight:500;cursor:pointer;transition:background .2s,transform .15s}
 .btn-dl:hover{background:#5de0aa;transform:translateY(-1px)}
-
 /* participant card */
 .pcard{background:var(--surf);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:26px}
 .phdr{background:var(--surf2);padding:14px 18px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--border);flex-wrap:wrap}
 .pid{background:var(--accent);color:#060d14;font-size:11px;font-weight:500;padding:3px 9px;border-radius:4px;letter-spacing:.04em;white-space:nowrap}
 .chips{display:flex;gap:7px;flex-wrap:wrap}
 .chip{font-size:10px;color:var(--muted);border:1px solid var(--border);border-radius:3px;padding:2px 7px;letter-spacing:.03em}
-
 /* chart sections */
 .csec{padding:18px 18px 4px}
 .cgrp{margin-bottom:20px}
 .cgrp-title{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:12px;padding-bottom:5px;border-bottom:1px solid var(--border)}
-
 /* horizontal bar chart */
 .brow{display:grid;grid-template-columns:160px 1fr 56px;align-items:center;gap:10px;margin-bottom:4px}
 .blbl{font-size:10px;color:var(--text);text-align:right;line-height:1.3;padding-right:2px}
@@ -92,15 +84,12 @@ input[type="file"]{display:none}
 .zlrow{display:grid;grid-template-columns:160px 1fr 56px;margin-bottom:12px}
 .zlstrip{display:flex;padding-left:0}
 .zlitem{font-size:8px;letter-spacing:.03em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 2px;line-height:1}
-
 /* ref badge */
 .refbadge{display:inline-block;font-size:8px;color:var(--muted);border:1px solid var(--border);border-radius:2px;padding:1px 5px;margin-left:6px;vertical-align:middle;letter-spacing:.02em;cursor:help}
-
 /* radar */
 .radar-wrap{display:flex;flex-direction:column;align-items:center;padding:4px 0 18px}
 .radar-caption{font-size:10px;color:var(--muted);margin-bottom:8px;text-align:center}
 canvas.rc{max-width:360px;width:100%}
-
 /* missing pills */
 .msec{padding:12px 18px 16px;border-top:1px solid var(--border)}
 .mtitle{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
@@ -109,11 +98,9 @@ canvas.rc{max-width:360px;width:100%}
 .mok{background:rgba(62,207,142,.12);color:var(--green)}
 .mwn{background:rgba(245,166,35,.12);color:var(--amber)}
 .mbd{background:rgba(240,107,107,.12);color:var(--red)}
-
 /* tooltip */
 .tip{position:fixed;background:var(--surf2);border:1px solid var(--border);border-radius:7px;padding:9px 13px;font-size:10px;color:var(--text);pointer-events:none;z-index:9999;opacity:0;transition:opacity .12s;max-width:240px;line-height:1.7;box-shadow:0 8px 24px rgba(0,0,0,.4)}
 .tip b{color:var(--accent)}
-
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
@@ -132,7 +119,6 @@ canvas.rc{max-width:360px;width:100%}
     <h1>Qualtrics <em>Processor</em></h1>
     <p class="subtitle">Drop both Qualtrics exports below. Scoring, cutoff visualisation, and Excel export all run locally — no data is uploaded anywhere.</p>
   </div>
-
   <div class="drop-grid">
     <div class="drop-zone" id="zv" onclick="document.getElementById('iv').click()">
       <input type="file" id="iv" accept=".xlsx,.xls,.csv">
@@ -151,16 +137,13 @@ canvas.rc{max-width:360px;width:100%}
       <div class="dfn" id="fnl"></div>
     </div>
   </div>
-
   <div class="btn-wrap">
     <button class="btn" id="btnrun" disabled onclick="run()">
       <div class="spin"></div>
       <span>⚡ Score Questionnaires</span>
     </button>
   </div>
-
   <div class="log" id="logbox"></div>
-
   <div class="results" id="results">
     <div class="rh">
       <div class="rt">Results</div>
@@ -170,10 +153,25 @@ canvas.rc{max-width:360px;width:100%}
   </div>
 </div>
 <div class="tip" id="tip"></div>
-
 <script>
 // ════════════════════════════════════════════════════════════════
-// CLINICAL CUTOFF DEFINITIONS 
+// COLUMN LAYOUT NOTE  (export format updated June 2026)
+// ────────────────────────────────────────────────────────────────
+// The 17 leading Qualtrics metadata columns (StartDate … UserLanguage,
+// plus the old consent Q1) were removed from this export, and "Finished"
+// was moved to column 0. Net effect: every instrument from the
+// Participant-ID column onward shifted LEFT by 17 positions vs. the
+// previous build. All column indices below reflect the NEW layout.
+//
+// Scoring stays POSITIONAL (not keyed by Qualtrics code) on purpose:
+// codes such as Q1/Q2/Q3 repeat across nearly every instrument, so the
+// code names cannot uniquely identify a column. validateLayout() below
+// sanity-checks a handful of anchor columns and warns if the layout
+// drifts again, instead of failing silently.
+// ════════════════════════════════════════════════════════════════
+
+// ════════════════════════════════════════════════════════════════
+// CLINICAL CUTOFF DEFINITIONS
 // ════════════════════════════════════════════════════════════════
 const CUT = {
   HADS_Anxiety:{
@@ -301,11 +299,9 @@ const CUT = {
     ]
   },
 };
-
 // PDQ-39 subscales for radar
 const PDQ_KEYS=['PDQ39_Mobility','PDQ39_ADL','PDQ39_Emotional','PDQ39_Stigma','PDQ39_Social','PDQ39_Cognition','PDQ39_Communication','PDQ39_Bodily'];
 const PDQ_LBLS=['Mobility','ADL','Emotional','Stigma','Social','Cognition','Comm.','Bodily'];
-
 // ════════════════════════════════════════════════════════════════
 // FILE SETUP
 // ════════════════════════════════════════════════════════════════
@@ -320,7 +316,6 @@ function dropSetup(zid,iid,which,fnid){
 }
 dropSetup('zv','iv','v','fnv');dropSetup('zl','il','l','fnl');
 function chk(){document.getElementById('btnrun').disabled=!(vF&&lF)}
-
 // ════════════════════════════════════════════════════════════════
 // LOG
 // ════════════════════════════════════════════════════════════════
@@ -331,7 +326,6 @@ function lg(msg,t='in'){
   d.innerHTML=`<span class="lt">${now}</span><span class="l${t}">${msg}</span>`;
   b.appendChild(d);b.scrollTop=b.scrollHeight;
 }
-
 // ════════════════════════════════════════════════════════════════
 // XLSX/CSV PARSE
 // ════════════════════════════════════════════════════════════════
@@ -344,38 +338,67 @@ function readXlsx(f){
 }
 function parseQ(arr){
   const codes=(arr[0]||[]).map(v=>v==null?'':String(v));
+  const qtext=(arr[1]||[]).map(v=>v==null?'':String(v)); // row 1 = human-readable question text
   const seen={};const uc=codes.map(c=>{if(seen[c]===undefined){seen[c]=0;return c}seen[c]++;return c+'_'+seen[c]});
-  return{codes:uc,data:arr.slice(2)};
+  return{codes:uc,qtext,data:arr.slice(2)};
 }
-
+// Anchor sanity-check: warns (does not block) if the column layout drifts.
+function validateLayout(qtext,ncol){
+  const anchors=[
+    [2,'participant id'],[9,'freezing episodes'],[57,'anxious'],
+    [69,'freezing of gait'],[107,'tense'],[198,'pleasant'],[218,'caffeine']
+  ];
+  let warns=0;
+  if(ncol<219){lg(`⚠ Layout check: expected ≥219 columns, found ${ncol}. Scores may be misaligned.`,'wn');warns++}
+  anchors.forEach(([i,kw])=>{
+    const t=(qtext[i]||'').toLowerCase();
+    if(!t.includes(kw)){
+      lg(`⚠ Layout check: column ${i} expected to contain "${kw}" — got "${(qtext[i]||'').slice(0,46)}". Verify the export format.`,'wn');
+      warns++;
+    }
+  });
+  if(!warns)lg('Layout check passed — anchor columns aligned','ok');
+  return warns;
+}
 // ════════════════════════════════════════════════════════════════
-// SCORING
+// SCORING   (column indices = NEW export layout, June 2026)
 // ════════════════════════════════════════════════════════════════
 const n2=v=>{if(v===null||v===undefined||v==='')return NaN;const x=Number(v);return isNaN(x)?NaN:x};
 const ni=v=>v===null||v===undefined||Number.isNaN(v)||v==='';
 const ns=a=>a.reduce((s,x)=>s+(ni(x)?0:x),0);
-
-function sNFOGQ(r){const q1=n2(r[26]);if(ni(q1))return{NFOG_Q_Total:NaN,NFOG_Q_FOG_Present:NaN};if(q1===1)return{NFOG_Q_Total:0,NFOG_Q_FOG_Present:0};const it=[];for(let c=27;c<35;c++)it.push(n2(r[c]));const cv=it.map(x=>ni(x)?NaN:x-1);const nm=cv.filter(x=>ni(x)).length;return{NFOG_Q_Total:nm<4?ns(cv):NaN,NFOG_Q_FOG_Present:1,NFOG_Q_Missing:nm}}
-function sPDQ39(r){const raw=[];for(let c=35;c<74;c++)raw.push(n2(r[c]));const cv=raw.map(x=>ni(x)?NaN:x-1);const sb={PDQ39_Mobility:[cv.slice(0,10),10],PDQ39_ADL:[cv.slice(10,16),6],PDQ39_Emotional:[cv.slice(16,22),6],PDQ39_Stigma:[cv.slice(22,26),4],PDQ39_Social:[cv.slice(26,29),3],PDQ39_Cognition:[cv.slice(29,33),4],PDQ39_Communication:[cv.slice(33,36),3],PDQ39_Bodily:[cv.slice(36,39),3]};const sc={};const si=[];for(const[k,[it,n]]of Object.entries(sb)){const nm=it.filter(x=>ni(x)).length;if(nm>Math.floor(n/2)){sc[k]=NaN}else{const v=Math.round(ns(it)/(n*4)*10000)/100;sc[k]=v;si.push(v)}}sc.PDQ39_SI=si.length?Math.round(si.reduce((a,b)=>a+b,0)/si.length*100)/100:NaN;sc.PDQ39_Missing=cv.filter(x=>ni(x)).length;return sc}
-function sPAS(r){const p=[];for(let c=74;c<79;c++)p.push(n2(r[c]));const e=[];for(let c=79;c<83;c++)e.push(n2(r[c]));const av=[];for(let c=83;c<86;c++)av.push(n2(r[c]));const sub=(it,lb)=>{const nm=it.filter(x=>ni(x)).length;return{[lb]:nm>Math.floor(it.length/2)?NaN:ns(it),[lb+'_M']:nm}};const s={...sub(p,'PAS_Persistent'),...sub(e,'PAS_Episodic'),...sub(av,'PAS_Avoidance')};const al=[...p,...e,...av];s.PAS_Total=al.filter(x=>ni(x)).length<=3?ns(al):NaN;return s}
-function sHADS(r){const it=[];for(let c=124;c<138;c++)it.push(n2(r[c]));const anx=[0,2,4,6,8,10,12].map(i=>it[i]);const dep=[1,3,5,7,9,11,13].map(i=>it[i]);const sub=(v,lb)=>{const nm=v.filter(x=>ni(x)).length;return{[lb]:nm<=2?ns(v):NaN,[lb+'_M']:nm}};return{...sub(anx,'HADS_Anxiety'),...sub(dep,'HADS_Depression')}}
-function sPROFOG(r){const it=[];for(let c=138;c<154;c++)it.push(n2(r[c]));const cv=it.map(x=>ni(x)?NaN:x-1);const nm=cv.filter(x=>ni(x)).length;return{PRO_FOG_Total:nm<=3?ns(cv):NaN,PRO_FOG_Missing:nm}}
-function sPASE(r){const fw={1:0,2:.11,3:.43,4:1};const hw={1:.5,2:1.5,3:3,4:5};const ac=(fc,hc,wt)=>{const f=n2(r[fc]);if(ni(f)||f===1)return 0;const h=n2(r[hc]);return(fw[f]||0)*(ni(h)?0:(hw[h]||0))*wt};let p=ac(154,156,1)+ac(157,158,1.5)+ac(159,161,1.5)+ac(162,164,3)+ac(165,167,4.5)+ac(168,170,3);for(let c=171;c<=176;c++)p+=(n2(r[c])===2?25:0);if(n2(r[177])===2){const h=n2(r[178]);p+=(ni(h)?0:h)*21}return{PASE_Total:Math.round(p*10)/10}}
-function sFESI(r){const it=[];for(let c=198;c<214;c++)it.push(n2(r[c]));const nm=it.filter(x=>ni(x)).length;return{FES_I_Total:nm<=3?ns(it):NaN,FES_I_Missing:nm}}
-function sSTAI(r){const it=[];for(let c=215;c<235;c++)it.push(n2(r[c]));const pos=new Set([1,3,6,7,10,13,14,16,19]);const cv=it.map((x,i)=>ni(x)?NaN:(pos.has(i+1)?x:5-x));const nm=cv.filter(x=>ni(x)).length;return{STAI_Trait_Total:nm<=4?ns(cv):NaN,STAI_Trait_Missing:nm}}
-function sMSQ(r){return{MSQ_ActsOutDreams:n2(r[180]),MSQ_LegsTwitch:n2(r[186]),MSQ_RestlessLegs:n2(r[187]),MSQ_Sleepwalking:n2(r[191]),MSQ_SnortChoke:n2(r[192]),MSQ_StopBreathing:n2(r[193]),MSQ_LegCramps:n2(r[195]),MSQ_Alertness_0to10:n2(r[196])}}
-function sDemog(vr,lr){const gm={1:'Man',2:'Woman',3:'Non-binary',4:'Self-describe'};const gv=n2(vr[20]);const dur=n2(vr[5]);return{Participant_ID:String(lr[19]||''),Gender:gm[gv]||'',Age:n2(vr[22]),Symptom_Onset:String(lr[23]||''),Formal_Diagnosis:String(lr[24]||''),Date_Completed:vr[0]?String(vr[0]).slice(0,10):'',Duration_min:ni(dur)?NaN:Math.round(dur/60*10)/10}}
-
-// FIXED CFOG FUNCTION (Now ignores 999 missing values)
+// NFOG-Q: gate=idx9 (1="not experienced"→no FOG; 2="experienced"→score), items Q2–Q9 = idx10–17
+function sNFOGQ(r){const q1=n2(r[9]);if(ni(q1))return{NFOG_Q_Total:NaN,NFOG_Q_FOG_Present:NaN};if(q1===1)return{NFOG_Q_Total:0,NFOG_Q_FOG_Present:0};const it=[];for(let c=10;c<18;c++)it.push(n2(r[c]));const cv=it.map(x=>ni(x)?NaN:x-1);const nm=cv.filter(x=>ni(x)).length;return{NFOG_Q_Total:nm<4?ns(cv):NaN,NFOG_Q_FOG_Present:1,NFOG_Q_Missing:nm}}
+// PDQ-39: 39 items = idx18–56 (1-based → x-1)
+function sPDQ39(r){const raw=[];for(let c=18;c<57;c++)raw.push(n2(r[c]));const cv=raw.map(x=>ni(x)?NaN:x-1);const sb={PDQ39_Mobility:[cv.slice(0,10),10],PDQ39_ADL:[cv.slice(10,16),6],PDQ39_Emotional:[cv.slice(16,22),6],PDQ39_Stigma:[cv.slice(22,26),4],PDQ39_Social:[cv.slice(26,29),3],PDQ39_Cognition:[cv.slice(29,33),4],PDQ39_Communication:[cv.slice(33,36),3],PDQ39_Bodily:[cv.slice(36,39),3]};const sc={};const si=[];for(const[k,[it,n]]of Object.entries(sb)){const nm=it.filter(x=>ni(x)).length;if(nm>Math.floor(n/2)){sc[k]=NaN}else{const v=Math.round(ns(it)/(n*4)*10000)/100;sc[k]=v;si.push(v)}}sc.PDQ39_SI=si.length?Math.round(si.reduce((a,b)=>a+b,0)/si.length*100)/100:NaN;sc.PDQ39_Missing=cv.filter(x=>ni(x)).length;return sc}
+// PAS: persistent idx57–61, episodic idx62–65, avoidance idx66–68 (0-based, raw sum)
+function sPAS(r){const p=[];for(let c=57;c<62;c++)p.push(n2(r[c]));const e=[];for(let c=62;c<66;c++)e.push(n2(r[c]));const av=[];for(let c=66;c<69;c++)av.push(n2(r[c]));const sub=(it,lb)=>{const nm=it.filter(x=>ni(x)).length;return{[lb]:nm>Math.floor(it.length/2)?NaN:ns(it),[lb+'_M']:nm}};const s={...sub(p,'PAS_Persistent'),...sub(e,'PAS_Episodic'),...sub(av,'PAS_Avoidance')};const al=[...p,...e,...av];s.PAS_Total=al.filter(x=>ni(x)).length<=3?ns(al):NaN;return s}
+// HADS: 14 items = idx107–120; anxiety=even positions, depression=odd (0-based, raw sum;
+//       Qualtrics values are already directionally coded so higher = more symptomatic)
+function sHADS(r){const it=[];for(let c=107;c<121;c++)it.push(n2(r[c]));const anx=[0,2,4,6,8,10,12].map(i=>it[i]);const dep=[1,3,5,7,9,11,13].map(i=>it[i]);const sub=(v,lb)=>{const nm=v.filter(x=>ni(x)).length;return{[lb]:nm<=2?ns(v):NaN,[lb+'_M']:nm}};return{...sub(anx,'HADS_Anxiety'),...sub(dep,'HADS_Depression')}}
+// PRO-FOG: 16 items = idx121–136 (1-based → x-1)
+function sPROFOG(r){const it=[];for(let c=121;c<137;c++)it.push(n2(r[c]));const cv=it.map(x=>ni(x)?NaN:x-1);const nm=cv.filter(x=>ni(x)).length;return{PRO_FOG_Total:nm<=3?ns(cv):NaN,PRO_FOG_Missing:nm}}
+// PASE: leisure freq/hours pairs idx137–153, housework yes/no idx154–159, work gate idx160 + hours idx161
+// NOTE: work-hours (idx161) is a FREE-TEXT field; n2() keeps it only when the entry is purely numeric.
+function sPASE(r){const fw={1:0,2:.11,3:.43,4:1};const hw={1:.5,2:1.5,3:3,4:5};const ac=(fc,hc,wt)=>{const f=n2(r[fc]);if(ni(f)||f===1)return 0;const h=n2(r[hc]);return(fw[f]||0)*(ni(h)?0:(hw[h]||0))*wt};let p=ac(137,139,1)+ac(140,141,1.5)+ac(142,144,1.5)+ac(145,147,3)+ac(148,150,4.5)+ac(151,153,3);for(let c=154;c<=159;c++)p+=(n2(r[c])===2?25:0);if(n2(r[160])===2){const h=n2(r[161]);p+=(ni(h)?0:h)*21}return{PASE_Total:Math.round(p*10)/10}}
+// FES-I: 16 items = idx181–196 (1-based, raw sum → range 16–64)
+function sFESI(r){const it=[];for(let c=181;c<197;c++)it.push(n2(r[c]));const nm=it.filter(x=>ni(x)).length;return{FES_I_Total:nm<=3?ns(it):NaN,FES_I_Missing:nm}}
+// STAI Trait (Y-2): 20 items = idx198–217. Values 1–4 (Almost never→Almost always).
+// REVERSE-SCORED (anxiety-ABSENT) items = {1,3,6,7,10,13,14,16,19} → 5-x; anxiety-present items kept as x.
+function sSTAI(r){const it=[];for(let c=198;c<218;c++)it.push(n2(r[c]));const rev=new Set([1,3,6,7,10,13,14,16,19]);const cv=it.map((x,i)=>ni(x)?NaN:(rev.has(i+1)?5-x:x));const nm=cv.filter(x=>ni(x)).length;return{STAI_Trait_Total:nm<=4?ns(cv):NaN,STAI_Trait_Missing:nm}}
+// MSQ: selected screening items + alertness (idx179)
+function sMSQ(r){return{MSQ_ActsOutDreams:n2(r[163]),MSQ_LegsTwitch:n2(r[169]),MSQ_RestlessLegs:n2(r[170]),MSQ_Sleepwalking:n2(r[174]),MSQ_SnortChoke:n2(r[175]),MSQ_StopBreathing:n2(r[176]),MSQ_LegCramps:n2(r[178]),MSQ_Alertness_0to10:n2(r[179])}}
+// Demographics: ID idx2, Gender idx3, Age idx5, Onset idx6, Diagnosis idx7
+// (Date_Completed and Duration columns were removed from this export.)
+function sDemog(vr,lr){const gm={1:'Man',2:'Woman',3:'Non-binary',4:'Self-describe'};const gv=n2(vr[3]);return{Participant_ID:String(lr[2]||''),Gender:gm[gv]||'',Age:n2(vr[5]),Symptom_Onset:String(lr[6]||''),Formal_Diagnosis:String(lr[7]||'')}}
+// C-FOG: gate idx69 (0=Yes→has FOG, 1=No), frequency idx70, triggers Q9_1..Q9_12 = idx76–87
 function sCFOG(r){
-  const h = n2(r[86]);
+  const h = n2(r[69]);
   // In Qualtrics: 0 = Yes, 1 = No for this survey
   const hasFOG = (h === 0) ? 1 : (h === 1) ? 0 : NaN;
-  const freq = (h === 0) ? n2(r[87]) : (h === 1) ? 0 : NaN;
-
-  // Extract Triggers (Q9_1 to Q9_12 are at indices 93 to 104)
+  const freq = (h === 0) ? n2(r[70]) : (h === 1) ? 0 : NaN;
+  // Extract Triggers (Q9_1 to Q9_12 are at indices 76 to 87)
   const t = [];
-  for(let i=93; i<=104; i++){
+  for(let i=76; i<=87; i++){
     let val = n2(r[i]);
     // If the value is missing OR is Qualtrics' 999 code, treat it as NaN
     if (ni(val) || val === 999) {
@@ -383,7 +406,6 @@ function sCFOG(r){
     }
     t.push(val);
   }
-
   // Calculate Cluster Phenotype Sub-scores
   // Cluster 1 (Motor): Items 1, 2, 7, 9, 10
   const c1 = ns([t[0], t[1], t[6], t[8], t[9]]);
@@ -391,7 +413,6 @@ function sCFOG(r){
   const c2 = ns([t[2], t[3], t[4], t[5]]);
   // Cluster 3 (Sensory-Attention): Items 8, 11, 12
   const c3 = ns([t[7], t[10], t[11]]);
-
   return {
     CFOG_Has_FOG: hasFOG,
     CFOG_Frequency: freq,
@@ -401,316 +422,7 @@ function sCFOG(r){
     CFOG_Cluster3_Sensory: hasFOG === 1 ? c3 : (hasFOG === 0 ? 0 : NaN)
   }
 }
-
-function scorePt(vr,lr){const s={};Object.assign(s,sDemog(vr,lr),sNFOGQ(vr),sPDQ39(vr),sPAS(vr),sCFOG(vr),sHADS(vr),sPROFOG(vr),sPASE(vr),sMSQ(vr),sFESI(vr),sSTAI(vr));s.Caffeine=n2(vr[235]);return s}
-
-function chkMissing(r){const rng={'NFOG-Q':[26,35],'PDQ-39':[35,74],'PAS':[74,86],'C-FOG':[86,124],'HADS':[124,138],'PRO-FOG':[138,154],'PASE':[154,180],'MSQ':[180,197],'FES-I':[198,214],'STAI Trait':[215,235]};const f={};for(const[sc,[s,e]]of Object.entries(rng)){let nm=0,nt=0;for(let c=s;c<e;c++){nt++;if(ni(n2(r[c])))nm++}f[sc]={nt,nm,pct:Math.round(nm/nt*1000)/10,status:nm===0?'COMPLETE':nm/nt<=.15?'MINOR':'MAJOR'}}return f}
-
-// ════════════════════════════════════════════════════════════════
-// TOOLTIP
-// ════════════════════════════════════════════════════════════════
-const tip=document.getElementById('tip');
-function showTip(e,html){tip.innerHTML=html;tip.style.opacity='1';mvTip(e)}
-function mvTip(e){tip.style.left=Math.min(e.clientX+16,window.innerWidth-260)+'px';tip.style.top=Math.min(e.clientY+14,window.innerHeight-110)+'px'}
-function hideTip(){tip.style.opacity='0'}
-
-// ════════════════════════════════════════════════════════════════
-// BAR CHART RENDERER
-// ════════════════════════════════════════════════════════════════
-function makeBar(key, val){
-  const cfg=CUT[key]; if(!cfg) return null;
-  const {min,max,zones,cite,label}=cfg;
-  const range=max-min;
-  const hasVal=!ni(val)&&!isNaN(val);
-
-  const zoneHtml=zones.map(z=>{
-    const w=((z.t-z.f)/range*100).toFixed(3);
-    return `<div class="bzone" style="width:${w}%;background:${z.c};opacity:.38"
-      onmouseenter="showTip(event,'<b>${z.l}</b><br>${z.d}')"
-      onmousemove="mvTip(event)" onmouseleave="hideTip()"></div>`;
-  }).join('');
-
-  const ticks=zones.slice(1).map(z=>`<div class="btick" style="left:${((z.f-min)/range*100).toFixed(3)}%"></div>`).join('');
-
-  let fillPct=0,fillCol='rgba(255,255,255,.6)';
-  if(hasVal){
-    const cl=Math.max(min,Math.min(max,val));
-    fillPct=(cl-min)/range*100;
-    for(const z of zones){if(cl>=z.f&&cl<z.t){fillCol=z.c;break}}
-    if(val>=max) fillCol=zones[zones.length-1].c;
-  }
-
-  const zlHtml=zones.map(z=>{
-    const w=((z.t-z.f)/range*100).toFixed(3);
-    return `<div class="zlitem" style="width:${w}%;color:${z.c}88">${z.l}</div>`;
-  }).join('');
-
-  const dispVal=hasVal?(Number.isInteger(val)?val:Math.round(val*10)/10):'n/a';
-  const valColor=hasVal?(()=>{for(const z of zones){if(val>=z.f&&val<z.t)return z.c}return zones[zones.length-1].c})():'var(--muted)';
-
-  const wrap=document.createElement('div');
-  wrap.innerHTML=`
-    <div class="brow">
-      <div class="blbl">${label}<span class="refbadge" onmouseenter="showTip(event,'<b>Reference</b><br>${cite}')" onmousemove="mvTip(event)" onmouseleave="hideTip()">ref</span></div>
-      <div class="btrack">
-        <div class="bzones">${zoneHtml}</div>
-        ${ticks}
-        ${hasVal?`<div class="bfill" style="width:${fillPct}%;background:${fillCol};box-shadow:0 0 7px ${fillCol}55"></div>`:''}
-      </div>
-      <div class="bval ${hasVal?'':'na'}" style="color:${valColor}">${dispVal}</div>
-    </div>
-    <div class="zlrow"><div></div><div class="zlstrip">${zlHtml}</div><div></div></div>
-  `;
-  return wrap;
-}
-
-// ════════════════════════════════════════════════════════════════
-// RADAR CHART — PDQ-39 subscales  (pure Canvas)
-// ════════════════════════════════════════════════════════════════
-function makeRadar(scores){
-  const vals=PDQ_KEYS.map(k=>scores[k]);
-  const n=PDQ_LBLS.length;
-  const canvas=document.createElement('canvas');
-  canvas.className='rc'; canvas.width=360; canvas.height=320;
-
-  requestAnimationFrame(()=>{
-    const ctx=canvas.getContext('2d');
-    const cx=180,cy=152,R=108;
-    const ang=i=>Math.PI*2/n*i-Math.PI/2;
-
-    [20,40,60,80,100].forEach(pct=>{
-      ctx.beginPath();
-      for(let i=0;i<n;i++){const a=ang(i),r=R*pct/100;i===0?ctx.moveTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r):ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r)}
-      ctx.closePath();ctx.strokeStyle='rgba(255,255,255,.07)';ctx.lineWidth=1;ctx.stroke();
-    });
-
-    ctx.beginPath();
-    for(let i=0;i<n;i++){const a=ang(i),r=R*.5;i===0?ctx.moveTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r):ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r)}
-    ctx.closePath();ctx.strokeStyle='rgba(245,158,11,.35)';ctx.lineWidth=1.5;ctx.stroke();
-
-    ctx.fillStyle='rgba(99,112,128,.55)';ctx.font='8px DM Mono,monospace';ctx.textAlign='center';
-    [20,40,60,80,100].forEach(p=>{ctx.fillText(p,cx+2,cy-R*p/100+3)});
-
-    for(let i=0;i<n;i++){const a=ang(i);ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(a)*R,cy+Math.sin(a)*R);ctx.strokeStyle='rgba(255,255,255,.09)';ctx.lineWidth=1;ctx.stroke()}
-
-    const pts=vals.map((v,i)=>{const pct=(ni(v)?0:v)/100;const a=ang(i);return[cx+Math.cos(a)*R*pct,cy+Math.sin(a)*R*pct]});
-    ctx.beginPath();pts.forEach(([x,y],i)=>i===0?ctx.moveTo(x,y):ctx.lineTo(x,y));
-    ctx.closePath();ctx.fillStyle='rgba(79,163,232,.15)';ctx.fill();
-    ctx.strokeStyle='rgba(79,163,232,.65)';ctx.lineWidth=2;ctx.stroke();
-
-    pts.forEach(([x,y],i)=>{
-      if(ni(vals[i]))return;
-      ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);
-      ctx.fillStyle='#4fa3e8';ctx.fill();
-      ctx.strokeStyle='#0c1017';ctx.lineWidth=1.5;ctx.stroke();
-    });
-
-    PDQ_LBLS.forEach((lb,i)=>{
-      const a=ang(i);const pad=R+20;const x=cx+Math.cos(a)*pad,y=cy+Math.sin(a)*pad;
-      ctx.fillStyle='#dde6f0';ctx.font='10px DM Mono,monospace';
-      ctx.textAlign=x>cx+4?'left':x<cx-4?'right':'center';
-      ctx.textBaseline=y>cy+4?'top':y<cy-4?'bottom':'middle';
-      ctx.fillText(lb,x,y);
-      if(!ni(vals[i])){
-        const sv=Math.round(vals[i]);
-        const sx=cx+Math.cos(a)*(R*.75),sy=cy+Math.sin(a)*(R*.75);
-        ctx.fillStyle='rgba(79,163,232,.85)';ctx.font='bold 9px DM Mono,monospace';
-        ctx.textAlign='center';ctx.textBaseline='middle';
-        ctx.fillText(sv,sx,sy);
-      }
-    });
-
-    ctx.fillStyle='rgba(245,158,11,.5)';ctx.font='8px DM Mono,monospace';
-    ctx.textAlign='left';ctx.textBaseline='top';
-    ctx.fillText('— = 50 midpoint reference',cx-R,cy+R+14);
-  });
-
-  const wrap=document.createElement('div');wrap.className='radar-wrap';
-  const cap=document.createElement('div');cap.className='radar-caption';
-  cap.textContent='PDQ-39 Subscale Profile (0–100, higher = worse QoL)';
-  wrap.appendChild(cap);wrap.appendChild(canvas);
-  return wrap;
-}
-
-// ════════════════════════════════════════════════════════════════
-// RENDER PARTICIPANT CARDS
-// ════════════════════════════════════════════════════════════════
-function renderCards(allScores,allMissing,pids){
-  const cont=document.getElementById('cards');cont.innerHTML='';
-  allScores.forEach((s,i)=>{
-    const m=allMissing[i];
-    const card=document.createElement('div');card.className='pcard';
-
-    const hdr=document.createElement('div');hdr.className='phdr';
-    hdr.innerHTML=`<span class="pid">${s.Participant_ID||'—'}</span><div class="chips">
-      ${s.Gender?`<span class="chip">${s.Gender}</span>`:''}
-      ${!ni(s.Age)?`<span class="chip">Age ${s.Age}</span>`:''}
-      ${s.Formal_Diagnosis&&s.Formal_Diagnosis!='null'?`<span class="chip">Dx ${s.Formal_Diagnosis}</span>`:''}
-      ${!ni(s.Duration_min)?`<span class="chip">${s.Duration_min} min survey</span>`:''}
-    </div>`;
-    card.appendChild(hdr);
-
-    const csec=document.createElement('div');csec.className='csec';
-
-    function grp(title,keys){
-      const g=document.createElement('div');g.className='cgrp';
-      g.innerHTML=`<div class="cgrp-title">${title}</div>`;
-      keys.forEach(k=>{const b=makeBar(k,s[k]);if(b)g.appendChild(b)});
-      csec.appendChild(g);
-    }
-
-    grp('Anxiety & Mood',['HADS_Anxiety','HADS_Depression','STAI_Trait_Total','PAS_Total','PAS_Persistent','PAS_Episodic','PAS_Avoidance']);
-    grp('Freezing of Gait',['NFOG_Q_Total','PRO_FOG_Total']);
-
-    const qolGrp=document.createElement('div');qolGrp.className='cgrp';
-    qolGrp.innerHTML='<div class="cgrp-title">Quality of Life (PDQ-39) & Falls</div>';
-    const siBar=makeBar('PDQ39_SI',s.PDQ39_SI);if(siBar)qolGrp.appendChild(siBar);
-    qolGrp.appendChild(makeRadar(s));
-    const feBar=makeBar('FES_I_Total',s.FES_I_Total);if(feBar)qolGrp.appendChild(feBar);
-    csec.appendChild(qolGrp);
-
-    grp('Physical Activity & Sleep',['PASE_Total','MSQ_Alertness_0to10']);
-    card.appendChild(csec);
-
-    const ms=document.createElement('div');ms.className='msec';
-    ms.innerHTML='<div class="mtitle">Completeness</div><div class="mpills"></div>';
-    const pp=ms.querySelector('.mpills');
-    Object.entries(m).forEach(([sc,info])=>{
-      const cls=info.status==='COMPLETE'?'mok':info.status==='MINOR'?'mwn':'mbd';
-      const pill=document.createElement('span');pill.className=`mpill ${cls}`;
-      pill.textContent=info.status==='COMPLETE'?`✓ ${sc}`:`${sc} (${info.nm} missing)`;
-      pp.appendChild(pill);
-    });
-    card.appendChild(ms);
-    cont.appendChild(card);
-  });
-  document.getElementById('results').classList.add('on');
-}
-
-// ════════════════════════════════════════════════════════════════
-// EXCEL OUTPUT 
-// ════════════════════════════════════════════════════════════════
-const CN={N:'1F3864',B:'2E75B6',P:'D6E4F0',A:'F2F7FB',O:'E2EFDA',W:'FFE699',E:'FFCCCC',H:'FFFFFF'};
-function xc(v,bold=false,bg=null,fg='000000',sz=10,ha='center',wrap=false){const c={v:v??'',t:typeof v==='number'?'n':'s'};c.s={font:{name:'Arial',sz,bold,color:{rgb:fg}},fill:bg?{fgColor:{rgb:bg},patternType:'solid'}:{patternType:'none'},alignment:{horizontal:ha,vertical:'center',wrapText:wrap},border:{top:{style:'thin',color:{rgb:'B8CCE4'}},bottom:{style:'thin',color:{rgb:'B8CCE4'}},left:{style:'thin',color:{rgb:'B8CCE4'}},right:{style:'thin',color:{rgb:'B8CCE4'}}}};return c}
-function ws(ws,r,c,cell){const ref=XLSX.utils.encode_cell({r,c});ws[ref]=cell;if(!ws['!ref'])ws['!ref']=ref;else{const rng=XLSX.utils.decode_range(ws['!ref']);rng.e.r=Math.max(rng.e.r,r);rng.e.c=Math.max(rng.e.c,c);ws['!ref']=XLSX.utils.encode_range(rng)}}
-function mg(s,r1,c1,r2,c2){if(!s['!merges'])s['!merges']=[];s['!merges'].push({s:{r:r1,c:c1},e:{r:r2,c:c2}})}
-
-function buildScores(scores,pids){
-  const s={};
-  // Includes CFOG Clusters and handles missing values 
-  const groups=[
-    ['Demographics',['Participant_ID','Gender','Age','Symptom_Onset','Formal_Diagnosis','Date_Completed','Duration_min']],
-    ['NFOG-Q',['NFOG_Q_Total','NFOG_Q_FOG_Present','NFOG_Q_Missing']],
-    ['PDQ-39',['PDQ39_Mobility','PDQ39_ADL','PDQ39_Emotional','PDQ39_Stigma','PDQ39_Social','PDQ39_Cognition','PDQ39_Communication','PDQ39_Bodily','PDQ39_SI','PDQ39_Missing']],
-    ['PAS',['PAS_Persistent','PAS_Episodic','PAS_Avoidance','PAS_Total']],
-    ['C-FOG',['CFOG_Has_FOG','CFOG_Frequency','CFOG_Triggers_Total','CFOG_Cluster1_Motor','CFOG_Cluster2_Anxious','CFOG_Cluster3_Sensory']],
-    ['HADS',['HADS_Anxiety','HADS_Depression']],
-    ['PRO-FOG',['PRO_FOG_Total','PRO_FOG_Missing']],
-    ['PASE',['PASE_Total']],
-    ['MSQ',['MSQ_ActsOutDreams','MSQ_LegsTwitch','MSQ_RestlessLegs','MSQ_Sleepwalking','MSQ_SnortChoke','MSQ_StopBreathing','MSQ_LegCramps','MSQ_Alertness_0to10']],
-    ['FES-I',['FES_I_Total','FES_I_Missing']],
-    ['STAI Trait',['STAI_Trait_Total','STAI_Trait_Missing']],
-    ['Caffeine',['Caffeine']]
-  ];
-  const rngs={NFOG_Q_Total:'0–28',PDQ39_SI:'0–100',PDQ39_Mobility:'0–100',PDQ39_ADL:'0–100',PDQ39_Emotional:'0–100',PDQ39_Stigma:'0–100',PDQ39_Social:'0–100',PDQ39_Cognition:'0–100',PDQ39_Communication:'0–100',PDQ39_Bodily:'0–100',PAS_Persistent:'0–20',PAS_Episodic:'0–16',PAS_Avoidance:'0–12',PAS_Total:'0–48',HADS_Anxiety:'0–21',HADS_Depression:'0–21',PRO_FOG_Total:'0–64',FES_I_Total:'16–64',STAI_Trait_Total:'20–80',MSQ_Alertness_0to10:'0–10',PASE_Total:'0–360+', CFOG_Triggers_Total:'0–48', CFOG_Cluster1_Motor:'0–20', CFOG_Cluster2_Anxious:'0–16', CFOG_Cluster3_Sensory:'0–12'};
-  const flat=[];const cg=[];let col=0;
-  groups.forEach(([gn,cols])=>{mg(s,0,col,0,col+cols.length-1);ws(s,0,col,xc(gn,true,CN.B,'FFFFFF',10));for(let k=col+1;k<col+cols.length;k++)ws(s,0,k,xc('',false,CN.B));cols.forEach(c=>{flat.push(c);cg.push(gn)});col+=cols.length});
-  flat.forEach((c,j)=>{ws(s,1,j,xc(c.replace(/_/g,' '),true,cg[j]==='Demographics'?CN.N:CN.B,'FFFFFF',9,undefined,true));ws(s,2,j,xc(rngs[c]||'',false,'E9EFF7','1F3864',8))});
-  scores.forEach((sc,ri)=>{const row=3+ri,bg=ri%2?CN.A:CN.H;flat.forEach((c,j)=>{let v=sc[c];if(v===undefined||Number.isNaN(v))v='';ws(s,row,j,xc(v,false,bg))})});
-  s['!cols']=flat.map(c=>({wch:['Participant_ID','Gender','Date_Completed','Symptom_Onset','Formal_Diagnosis'].includes(c)?16:12}));
-  s['!rows']=[{hpt:20},{hpt:44},{hpt:14}];return s;
-}
-
-function buildRaw(ldata,codes){
-  const s={};const skip=new Set(['StartDate','EndDate','Status','IPAddress','Progress','Duration (in seconds)','Finished','RecordedDate','ResponseId','RecipientLastName','RecipientFirstName','RecipientEmail','ExternalReference','LocationLatitude','LocationLongitude','DistributionChannel','UserLanguage','Q1','Q2','Description']);
-  const keep=codes.reduce((a,c,i)=>{if(!skip.has(c)||i===19)a.push(i);return a},[]);
-  mg(s,0,0,0,keep.length-1);ws(s,0,0,xc('Raw Qualtrics Responses – Label Format',true,CN.N,'FFFFFF',12));
-  keep.forEach((ci,j)=>ws(s,1,j,xc(codes[ci],true,CN.B,'FFFFFF',9,undefined,true)));
-  ldata.forEach((row,ri)=>{const er=2+ri,bg=ri%2?CN.A:CN.H;keep.forEach((ci,j)=>{const v=row[ci];ws(s,er,j,xc(v!=null&&v!==''?String(v):'',false,bg,'000000',9,'left'))})});
-  s['!cols']=keep.map(()=>({wch:22}));s['!rows']=[{hpt:20},{hpt:40}];return s;
-}
-function buildMissing(missing,pids){
-  const s={};const scales=['NFOG-Q','PDQ-39','PAS','C-FOG','HADS','PRO-FOG','PASE','MSQ','FES-I','STAI Trait'];
-  mg(s,0,0,0,1+scales.length*3-1);ws(s,0,0,xc('Missing Data Summary',true,CN.N,'FFFFFF',12));
-  ws(s,1,0,xc('Participant ID',true,CN.B,'FFFFFF',9));ws(s,2,0,xc('ID',false,CN.P,'1F3864',8));
-  let c=1;scales.forEach(sc=>{mg(s,1,c,1,c+2);ws(s,1,c,xc(sc,true,CN.B,'FFFFFF',9));ws(s,1,c+1,xc('',false,CN.B));ws(s,1,c+2,xc('',false,CN.B));['N','%','Status'].forEach((h,k)=>ws(s,2,c+k,xc(h,false,CN.P,'1F3864',8)));c+=3});
-  pids.forEach((pid,ri)=>{const row=3+ri;ws(s,row,0,xc(pid,true));let co=1;scales.forEach(sc=>{const info=missing[ri][sc]||{};const bg=info.status==='COMPLETE'?CN.O:info.status==='MINOR'?CN.W:CN.E;ws(s,row,co,xc(info.nm??''));ws(s,row,co+1,xc(info.pct??''));ws(s,row,co+2,xc(info.status||'',false,bg));co+=3})});
-  s['!cols']=[{wch:16},...scales.flatMap(()=>[{wch:9},{wch:9},{wch:11}])];return s;
-}
-function buildRef(){
-  const s={};
-  const rows=[
-    ['NFOG-Q','New Freezing of Gait Questionnaire','0–28','0: no FOG · 1–9: mild · 10–19: moderate (fall risk ↑) · 20–28: severe (above population median). MDC = 35.5%.','Nieuwboer et al. 2009; Hulzinga et al. 2020'],
-    ['PDQ-39','Parkinson\'s Disease Questionnaire – 39','SI: 0–100 (subscales 0–100)','Lower = better QoL. MCID ≈ 4.2–5.4 pts on SI. Interpret subscales individually; SI is exploratory.','Jenkinson et al. 1997; Horváth et al. 2017'],
-    ['PAS','Parkinson Anxiety Scale','Total 0–48','Cutoff ≥13 (sens. 89%, spec. 80%). Persistent 0–20, Episodic 0–16, Avoidance 0–12.','Leentjens et al. 2014; Prasad et al. 2021'],
-    ['HADS','Hospital Anxiety & Depression Scale','Each 0–21','0–7: normal · 8–10: possible · 11–15: likely · 16–21: severe. Validated in PD.','Zigmond & Snaith 1983; Rodriguez-Blazquez et al. 2009'],
-    ['PRO-FOG','Patient-Reported Outcomes in FOG','0–64','Higher = greater daily impact. Quartile interpretation applied.','Mancini et al. 2021'],
-    ['PASE','Physical Activity Scale for the Elderly','0–360+','PD mean ≈ 80–120. Weighted frequency × hours scoring.','Washburn et al. 1993; van Nimwegen et al. 2010'],
-    ['MSQ','Mayo Sleep Questionnaire','Binary + alertness 0–10','Screens RBD, restless legs, sleep apnea. Alertness: 0 = sleep all day, 10 = fully awake.','Boeve et al. 2002'],
-    ['FES-I','Falls Efficacy Scale – International','16–64','16–19: low concern · 20–27: moderate · 28–64: high (fall risk management indicated). Validated in PD.','Delbaere et al. 2010; Mehdizadeh et al. 2019'],
-    ['STAI Y-2','STAI Trait Anxiety Inventory','20–80','Higher = greater trait anxiety. PD norms ≈ 40–50. Reverse-scored positive items.','Spielberger 1983; Ehgoetz Martens et al. 2016'],
-    ['C-FOG','Comprehensive FOG Questionnaire','Binary + Sub-scores','Phenotype mapping (Cluster 1: Motor, Cluster 2: Anxious, Cluster 3: Sensory).','King et al. 2012'],
-  ];
-  const hdrs=['Scale','Full Name','Score Range','Cutoff Interpretation','Reference'];const wids=[10,36,16,54,32];
-  mg(s,0,0,0,4);ws(s,0,0,xc('Scale Reference & Clinical Cutoffs — PD_HRV Home Questionnaires',true,CN.N,'FFFFFF',12));
-  hdrs.forEach((h,j)=>ws(s,1,j,xc(h,true,CN.B,'FFFFFF',10)));
-  rows.forEach((row,ri)=>{const er=2+ri,bg=ri%2?CN.A:CN.H;row.forEach((v,j)=>ws(s,er,j,xc(v,false,bg,'000000',9,'left',true)))});
-  s['!cols']=wids.map(w=>({wch:w}));s['!rows']=[{hpt:22},{hpt:18},...rows.map(()=>({hpt:32}))];return s;
-}
-
-function buildExcel(scores,missing,pids,lP){
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,buildScores(scores,pids),'Scored Scales');
-  XLSX.utils.book_append_sheet(wb,buildRaw(lP.data,lP.codes),'Raw Data (Labels)');
-  XLSX.utils.book_append_sheet(wb,buildMissing(missing,pids),'Missing Data');
-  XLSX.utils.book_append_sheet(wb,buildRef(),'Scale Reference');
-  return wb;
-}
-
-// ════════════════════════════════════════════════════════════════
-// MAIN
-// ════════════════════════════════════════════════════════════════
-async function run(){
-  const btn=document.getElementById('btnrun');
-  btn.classList.add('loading');btn.disabled=true;
-  document.getElementById('results').classList.remove('on');
-  document.getElementById('cards').innerHTML='';
-  try{
-    lg('Reading Values file…');
-    const vArr=await readXlsx(vF);lg(`Values: ${vArr.length-2} participant(s) detected`,'ok');
-    lg('Reading Labels file…');
-    const lArr=await readXlsx(lF);lg(`Labels: ${lArr.length-2} participant(s) detected`,'ok');
-    const vP=parseQ(vArr),lP=parseQ(lArr);
-    
-    // Determine the maximum number of rows between the two files
-    const N=Math.max(vP.data.length, lP.data.length);
-    if(!N){lg('No data rows found — check file format.','er');return}
-    if(vP.data.length !== lP.data.length) lg(`Row count mismatch: Values=${vP.data.length}, Labels=${lP.data.length}. Missing rows will be left blank.`,'wn');
-    
-    lg(`Scoring ${N} participant(s)…`);
-    const allScores=[],allMissing=[],pids=[];
-    for(let i=0;i<N;i++){
-      // SAFELY handle missing rows by falling back to empty arrays []
-      const vRow = vP.data[i] || [];
-      const lRow = lP.data[i] || [];
-      
-      const sc=scorePt(vRow, lRow);
-      const ms=chkMissing(vRow);
-      
-      allScores.push(sc);allMissing.push(ms);pids.push(sc.Participant_ID||`P${i+1}`);
-      lg(`${sc.Participant_ID||'?'} · PDQ-SI=${ni(sc.PDQ39_SI)?'—':sc.PDQ39_SI} · CFOG Triggers=${ni(sc.CFOG_Triggers_Total)?'—':sc.CFOG_Triggers_Total}`,'ok');
-    }
-    lg('Building Excel…');
-    lastWB=buildExcel(allScores,allMissing,pids,lP);
-    lg('✓ Complete — review charts below or download Excel','ok');
-    renderCards(allScores,allMissing,pids);
-  }catch(err){lg(`Error: ${err.message}`,'er');console.error(err)}
-  finally{btn.classList.remove('loading');btn.disabled=false}
-}
-  function dlExcel(){
-  if(!lastWB)return;
-  XLSX.writeFile(lastWB,`PD_HRV_Scored_${new Date().toISOString().slice(0,10).replace(/-/g,'')}.xlsx`,{bookType:'xlsx',type:'binary',cellStyles:true});
-}
-</script>
-</body>
-</html>
+function scorePt(vr,lr){const s={};Object.assign(s,sDemog(vr,lr),sNFOGQ(vr),sPDQ39(vr),sPAS(vr),sCFOG(vr),sHADS(vr),sPROFOG(vr),sPASE(vr),sMSQ(vr),sFESI(vr),sSTAI(vr));s.Caffeine=n2(vr[218]);return s}
+// Completeness ranges (NEW layout)
+function chkMissing(r){const rng={'NFOG-Q':[9,18],'PDQ-39':[18,57],'PAS':[57,69],'C-FOG':[69,107],'HADS':[107,121],'PRO-FOG':[121,137],'PASE':[137,163],'MSQ':[163,180],'FES-I':[181,197],'STAI Trait':[198,218]};const f={};for(const[sc,[s,e]]of Object.entries(rng)){let nm=0,nt=0;for(let c=s;c<e;c++){nt++;if(ni(n2(r[c])))nm++}f[sc]={nt,nm,pct:Math.round(nm/nt*1000)/10,status:nm===0?'COMPLETE':nm/nt<=.15?'MINOR':'MAJOR'}}return f}
+// ════════════════════════════════════════════════════════
