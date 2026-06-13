@@ -155,22 +155,6 @@ canvas.rc{max-width:360px;width:100%}
 <div class="tip" id="tip"></div>
 <script>
 // ════════════════════════════════════════════════════════════════
-// COLUMN LAYOUT NOTE  (export format updated June 2026)
-// ────────────────────────────────────────────────────────────────
-// The 17 leading Qualtrics metadata columns (StartDate … UserLanguage,
-// plus the old consent Q1) were removed from this export, and "Finished"
-// was moved to column 0. Net effect: every instrument from the
-// Participant-ID column onward shifted LEFT by 17 positions vs. the
-// previous build. All column indices below reflect the NEW layout.
-//
-// Scoring stays POSITIONAL (not keyed by Qualtrics code) on purpose:
-// codes such as Q1/Q2/Q3 repeat across nearly every instrument, so the
-// code names cannot uniquely identify a column. validateLayout() below
-// sanity-checks a handful of anchor columns and warns if the layout
-// drifts again, instead of failing silently.
-// ════════════════════════════════════════════════════════════════
-
-// ════════════════════════════════════════════════════════════════
 // CLINICAL CUTOFF DEFINITIONS
 // ════════════════════════════════════════════════════════════════
 const CUT = {
@@ -299,9 +283,9 @@ const CUT = {
     ]
   },
 };
-// PDQ-39 subscales for radar
 const PDQ_KEYS=['PDQ39_Mobility','PDQ39_ADL','PDQ39_Emotional','PDQ39_Stigma','PDQ39_Social','PDQ39_Cognition','PDQ39_Communication','PDQ39_Bodily'];
 const PDQ_LBLS=['Mobility','ADL','Emotional','Stigma','Social','Cognition','Comm.','Bodily'];
+
 // ════════════════════════════════════════════════════════════════
 // FILE SETUP
 // ════════════════════════════════════════════════════════════════
@@ -316,6 +300,7 @@ function dropSetup(zid,iid,which,fnid){
 }
 dropSetup('zv','iv','v','fnv');dropSetup('zl','il','l','fnl');
 function chk(){document.getElementById('btnrun').disabled=!(vF&&lF)}
+
 // ════════════════════════════════════════════════════════════════
 // LOG
 // ════════════════════════════════════════════════════════════════
@@ -326,8 +311,9 @@ function lg(msg,t='in'){
   d.innerHTML=`<span class="lt">${now}</span><span class="l${t}">${msg}</span>`;
   b.appendChild(d);b.scrollTop=b.scrollHeight;
 }
+
 // ════════════════════════════════════════════════════════════════
-// XLSX/CSV PARSE
+// XLSX/CSV PARSE & LAYOUT CHECK
 // ════════════════════════════════════════════════════════════════
 function readXlsx(f){
   return new Promise((res,rej)=>{
@@ -338,81 +324,148 @@ function readXlsx(f){
 }
 function parseQ(arr){
   const codes=(arr[0]||[]).map(v=>v==null?'':String(v));
-  const qtext=(arr[1]||[]).map(v=>v==null?'':String(v)); // row 1 = human-readable question text
+  const qtext=(arr[1]||[]).map(v=>v==null?'':String(v));
   const seen={};const uc=codes.map(c=>{if(seen[c]===undefined){seen[c]=0;return c}seen[c]++;return c+'_'+seen[c]});
   return{codes:uc,qtext,data:arr.slice(2)};
 }
-// Anchor sanity-check: warns (does not block) if the column layout drifts.
 function validateLayout(qtext,ncol){
   const anchors=[
     [2,'participant id'],[9,'freezing episodes'],[57,'anxious'],
     [69,'freezing of gait'],[107,'tense'],[198,'pleasant'],[218,'caffeine']
   ];
   let warns=0;
-  if(ncol<219){lg(`⚠ Layout check: expected ≥219 columns, found ${ncol}. Scores may be misaligned.`,'wn');warns++}
+  if(ncol<219){lg(`⚠ Layout check: expected ≥219 columns, found ${ncol}.`,'wn');warns++}
   anchors.forEach(([i,kw])=>{
     const t=(qtext[i]||'').toLowerCase();
     if(!t.includes(kw)){
-      lg(`⚠ Layout check: column ${i} expected to contain "${kw}" — got "${(qtext[i]||'').slice(0,46)}". Verify the export format.`,'wn');
+      lg(`⚠ Layout check: column ${i} expected "${kw}" — got "${(qtext[i]||'').slice(0,46)}".`,'wn');
       warns++;
     }
   });
   if(!warns)lg('Layout check passed — anchor columns aligned','ok');
   return warns;
 }
+
 // ════════════════════════════════════════════════════════════════
-// SCORING   (column indices = NEW export layout, June 2026)
+// SCORING MATH 
 // ════════════════════════════════════════════════════════════════
 const n2=v=>{if(v===null||v===undefined||v==='')return NaN;const x=Number(v);return isNaN(x)?NaN:x};
 const ni=v=>v===null||v===undefined||Number.isNaN(v)||v==='';
 const ns=a=>a.reduce((s,x)=>s+(ni(x)?0:x),0);
-// NFOG-Q: gate=idx9 (1="not experienced"→no FOG; 2="experienced"→score), items Q2–Q9 = idx10–17
-function sNFOGQ(r){const q1=n2(r[9]);if(ni(q1))return{NFOG_Q_Total:NaN,NFOG_Q_FOG_Present:NaN};if(q1===1)return{NFOG_Q_Total:0,NFOG_Q_FOG_Present:0};const it=[];for(let c=10;c<18;c++)it.push(n2(r[c]));const cv=it.map(x=>ni(x)?NaN:x-1);const nm=cv.filter(x=>ni(x)).length;return{NFOG_Q_Total:nm<4?ns(cv):NaN,NFOG_Q_FOG_Present:1,NFOG_Q_Missing:nm}}
-// PDQ-39: 39 items = idx18–56 (1-based → x-1)
-function sPDQ39(r){const raw=[];for(let c=18;c<57;c++)raw.push(n2(r[c]));const cv=raw.map(x=>ni(x)?NaN:x-1);const sb={PDQ39_Mobility:[cv.slice(0,10),10],PDQ39_ADL:[cv.slice(10,16),6],PDQ39_Emotional:[cv.slice(16,22),6],PDQ39_Stigma:[cv.slice(22,26),4],PDQ39_Social:[cv.slice(26,29),3],PDQ39_Cognition:[cv.slice(29,33),4],PDQ39_Communication:[cv.slice(33,36),3],PDQ39_Bodily:[cv.slice(36,39),3]};const sc={};const si=[];for(const[k,[it,n]]of Object.entries(sb)){const nm=it.filter(x=>ni(x)).length;if(nm>Math.floor(n/2)){sc[k]=NaN}else{const v=Math.round(ns(it)/(n*4)*10000)/100;sc[k]=v;si.push(v)}}sc.PDQ39_SI=si.length?Math.round(si.reduce((a,b)=>a+b,0)/si.length*100)/100:NaN;sc.PDQ39_Missing=cv.filter(x=>ni(x)).length;return sc}
-// PAS: persistent idx57–61, episodic idx62–65, avoidance idx66–68 (0-based, raw sum)
-function sPAS(r){const p=[];for(let c=57;c<62;c++)p.push(n2(r[c]));const e=[];for(let c=62;c<66;c++)e.push(n2(r[c]));const av=[];for(let c=66;c<69;c++)av.push(n2(r[c]));const sub=(it,lb)=>{const nm=it.filter(x=>ni(x)).length;return{[lb]:nm>Math.floor(it.length/2)?NaN:ns(it),[lb+'_M']:nm}};const s={...sub(p,'PAS_Persistent'),...sub(e,'PAS_Episodic'),...sub(av,'PAS_Avoidance')};const al=[...p,...e,...av];s.PAS_Total=al.filter(x=>ni(x)).length<=3?ns(al):NaN;return s}
-// HADS: 14 items = idx107–120; anxiety=even positions, depression=odd (0-based, raw sum;
-//       Qualtrics values are already directionally coded so higher = more symptomatic)
-function sHADS(r){const it=[];for(let c=107;c<121;c++)it.push(n2(r[c]));const anx=[0,2,4,6,8,10,12].map(i=>it[i]);const dep=[1,3,5,7,9,11,13].map(i=>it[i]);const sub=(v,lb)=>{const nm=v.filter(x=>ni(x)).length;return{[lb]:nm<=2?ns(v):NaN,[lb+'_M']:nm}};return{...sub(anx,'HADS_Anxiety'),...sub(dep,'HADS_Depression')}}
-// PRO-FOG: 16 items = idx121–136 (1-based → x-1)
-function sPROFOG(r){const it=[];for(let c=121;c<137;c++)it.push(n2(r[c]));const cv=it.map(x=>ni(x)?NaN:x-1);const nm=cv.filter(x=>ni(x)).length;return{PRO_FOG_Total:nm<=3?ns(cv):NaN,PRO_FOG_Missing:nm}}
-// PASE: leisure freq/hours pairs idx137–153, housework yes/no idx154–159, work gate idx160 + hours idx161
-// NOTE: work-hours (idx161) is a FREE-TEXT field; n2() keeps it only when the entry is purely numeric.
-function sPASE(r){const fw={1:0,2:.11,3:.43,4:1};const hw={1:.5,2:1.5,3:3,4:5};const ac=(fc,hc,wt)=>{const f=n2(r[fc]);if(ni(f)||f===1)return 0;const h=n2(r[hc]);return(fw[f]||0)*(ni(h)?0:(hw[h]||0))*wt};let p=ac(137,139,1)+ac(140,141,1.5)+ac(142,144,1.5)+ac(145,147,3)+ac(148,150,4.5)+ac(151,153,3);for(let c=154;c<=159;c++)p+=(n2(r[c])===2?25:0);if(n2(r[160])===2){const h=n2(r[161]);p+=(ni(h)?0:h)*21}return{PASE_Total:Math.round(p*10)/10}}
-// FES-I: 16 items = idx181–196 (1-based, raw sum → range 16–64)
-function sFESI(r){const it=[];for(let c=181;c<197;c++)it.push(n2(r[c]));const nm=it.filter(x=>ni(x)).length;return{FES_I_Total:nm<=3?ns(it):NaN,FES_I_Missing:nm}}
-// STAI Trait (Y-2): 20 items = idx198–217. Values 1–4 (Almost never→Almost always).
-// REVERSE-SCORED (anxiety-ABSENT) items = {1,3,6,7,10,13,14,16,19} → 5-x; anxiety-present items kept as x.
-function sSTAI(r){const it=[];for(let c=198;c<218;c++)it.push(n2(r[c]));const rev=new Set([1,3,6,7,10,13,14,16,19]);const cv=it.map((x,i)=>ni(x)?NaN:(rev.has(i+1)?5-x:x));const nm=cv.filter(x=>ni(x)).length;return{STAI_Trait_Total:nm<=4?ns(cv):NaN,STAI_Trait_Missing:nm}}
-// MSQ: selected screening items + alertness (idx179)
+
+// NFOG-Q: Gate (idx 9). Handles 0 (Recoded "No") OR 1 (Default Qualtrics Choice "No").
+function sNFOGQ(r){
+  const q1=n2(r[9]);
+  if(ni(q1)) return {NFOG_Q_Total:NaN,NFOG_Q_FOG_Present:NaN};
+  if(q1===0 || q1===1) return {NFOG_Q_Total:0,NFOG_Q_FOG_Present:0}; // NO FOG
+  const it=[];for(let c=10;c<18;c++)it.push(n2(r[c]));
+  const cv=it.map(x=>ni(x)?NaN:x-1); // 1-based to 0-based
+  const nm=cv.filter(x=>ni(x)).length;
+  return {NFOG_Q_Total:nm<4?ns(cv):NaN,NFOG_Q_FOG_Present:1,NFOG_Q_Missing:nm}
+}
+
+// PDQ-39: 1-based (1-5) to 0-based (0-4) mapping applied.
+function sPDQ39(r){
+  const raw=[];for(let c=18;c<57;c++)raw.push(n2(r[c]));
+  const cv=raw.map(x=>ni(x)?NaN:x-1);
+  const sb={PDQ39_Mobility:[cv.slice(0,10),10],PDQ39_ADL:[cv.slice(10,16),6],PDQ39_Emotional:[cv.slice(16,22),6],PDQ39_Stigma:[cv.slice(22,26),4],PDQ39_Social:[cv.slice(26,29),3],PDQ39_Cognition:[cv.slice(29,33),4],PDQ39_Communication:[cv.slice(33,36),3],PDQ39_Bodily:[cv.slice(36,39),3]};
+  const sc={};const si=[];
+  for(const[k,[it,n]]of Object.entries(sb)){
+    const nm=it.filter(x=>ni(x)).length;
+    if(nm>Math.floor(n/2)){sc[k]=NaN}else{const v=Math.round(ns(it)/(n*4)*10000)/100;sc[k]=v;si.push(v)}
+  }
+  sc.PDQ39_SI=si.length?Math.round(si.reduce((a,b)=>a+b,0)/si.length*100)/100:NaN;
+  sc.PDQ39_Missing=cv.filter(x=>ni(x)).length;return sc;
+}
+
+// PAS: Fixed to use x-1 to accommodate Qualtrics' default 1-5 export. 
+function sPAS(r){
+  const extract = (s, e) => {
+    let arr = [];
+    for(let c=s; c<e; c++) {
+      let val = n2(r[c]);
+      arr.push(ni(val) ? NaN : val - 1); // 1-5 to 0-4 adjustment
+    }
+    return arr;
+  };
+  const p=extract(57, 62);
+  const e=extract(62, 66);
+  const av=extract(66, 69);
+  const sub=(it,lb)=>{const nm=it.filter(x=>ni(x)).length;return{[lb]:nm>Math.floor(it.length/2)?NaN:ns(it),[lb+'_M']:nm}};
+  const s={...sub(p,'PAS_Persistent'),...sub(e,'PAS_Episodic'),...sub(av,'PAS_Avoidance')};
+  const al=[...p,...e,...av];
+  s.PAS_Total=al.filter(x=>ni(x)).length<=3?ns(al):NaN;
+  return s;
+}
+
+// HADS: Fixed reverse-scoring. If Qualtrics exports 1-4, `4-x` mathematically maps it correctly to the 3-0 text options.
+function sHADS(r){
+  const it=[];for(let c=107;c<121;c++){
+    let val = n2(r[c]);
+    it.push(ni(val) ? NaN : 4 - val); // Reverses 1,2,3,4 into 3,2,1,0
+  }
+  const anx=[0,2,4,6,8,10,12].map(i=>it[i]);
+  const dep=[1,3,5,7,9,11,13].map(i=>it[i]);
+  const sub=(v,lb)=>{const nm=v.filter(x=>ni(x)).length;return{[lb]:nm<=2?ns(v):NaN,[lb+'_M']:nm}};
+  return{...sub(anx,'HADS_Anxiety'),...sub(dep,'HADS_Depression')}
+}
+
+// PRO-FOG: 1-based (1-5) to 0-based (0-4).
+function sPROFOG(r){
+  const it=[];for(let c=121;c<137;c++)it.push(n2(r[c]));
+  const cv=it.map(x=>ni(x)?NaN:x-1);
+  const nm=cv.filter(x=>ni(x)).length;
+  return{PRO_FOG_Total:nm<=3?ns(cv):NaN,PRO_FOG_Missing:nm}
+}
+
+// PASE: Remains unchanged.
+function sPASE(r){
+  const fw={1:0,2:.11,3:.43,4:1};const hw={1:.5,2:1.5,3:3,4:5};
+  const ac=(fc,hc,wt)=>{const f=n2(r[fc]);if(ni(f)||f===1)return 0;const h=n2(r[hc]);return(fw[f]||0)*(ni(h)?0:(hw[h]||0))*wt};
+  let p=ac(137,139,1)+ac(140,141,1.5)+ac(142,144,1.5)+ac(145,147,3)+ac(148,150,4.5)+ac(151,153,3);
+  for(let c=154;c<=159;c++)p+=(n2(r[c])===2?25:0);
+  if(n2(r[160])===2){const h=n2(r[161]);p+=(ni(h)?0:h)*21}
+  return{PASE_Total:Math.round(p*10)/10}
+}
+
+// FES-I: Raw sum (no adjustment needed).
+function sFESI(r){
+  const it=[];for(let c=181;c<197;c++)it.push(n2(r[c]));
+  const nm=it.filter(x=>ni(x)).length;
+  return{FES_I_Total:nm<=3?ns(it):NaN,FES_I_Missing:nm}
+}
+
+// STAI: 1-4 standard scale. Reverse scored items get 5-x.
+function sSTAI(r){
+  const it=[];for(let c=198;c<218;c++)it.push(n2(r[c]));
+  const rev=new Set([1,3,6,7,10,13,14,16,19]);
+  const cv=it.map((x,i)=>ni(x)?NaN:(rev.has(i+1)?5-x:x));
+  const nm=cv.filter(x=>ni(x)).length;
+  return{STAI_Trait_Total:nm<=4?ns(cv):NaN,STAI_Trait_Missing:nm}
+}
+
+// MSQ
 function sMSQ(r){return{MSQ_ActsOutDreams:n2(r[163]),MSQ_LegsTwitch:n2(r[169]),MSQ_RestlessLegs:n2(r[170]),MSQ_Sleepwalking:n2(r[174]),MSQ_SnortChoke:n2(r[175]),MSQ_StopBreathing:n2(r[176]),MSQ_LegCramps:n2(r[178]),MSQ_Alertness_0to10:n2(r[179])}}
-// Demographics: ID idx2, Gender idx3, Age idx5, Onset idx6, Diagnosis idx7
-// (Date_Completed and Duration columns were removed from this export.)
+
+// Demographics
 function sDemog(vr,lr){const gm={1:'Man',2:'Woman',3:'Non-binary',4:'Self-describe'};const gv=n2(vr[3]);return{Participant_ID:String(lr[2]||''),Gender:gm[gv]||'',Age:n2(vr[5]),Symptom_Onset:String(lr[6]||''),Formal_Diagnosis:String(lr[7]||'')}}
-// C-FOG: gate idx69 (0=Yes→has FOG, 1=No), frequency idx70, triggers Q9_1..Q9_12 = idx76–87
+
+// C-FOG: Fixed gate to expect '1' (Qualtrics default for 'Yes')
 function sCFOG(r){
   const h = n2(r[69]);
-  // In Qualtrics: 0 = Yes, 1 = No for this survey
-  const hasFOG = (h === 0) ? 1 : (h === 1) ? 0 : NaN;
-  const freq = (h === 0) ? n2(r[70]) : (h === 1) ? 0 : NaN;
-  // Extract Triggers (Q9_1 to Q9_12 are at indices 76 to 87)
+  const hasFOG = (h === 1) ? 1 : (h === 2) ? 0 : NaN; // 1 = Yes, 2 = No
+  const freq = (hasFOG === 1) ? n2(r[70]) : (hasFOG === 0) ? 0 : NaN;
+  
   const t = [];
   for(let i=76; i<=87; i++){
     let val = n2(r[i]);
-    // If the value is missing OR is Qualtrics' 999 code, treat it as NaN
-    if (ni(val) || val === 999) {
-      val = NaN;
-    }
+    if (ni(val) || val === 999) val = NaN;
     t.push(val);
   }
-  // Calculate Cluster Phenotype Sub-scores
-  // Cluster 1 (Motor): Items 1, 2, 7, 9, 10
   const c1 = ns([t[0], t[1], t[6], t[8], t[9]]);
-  // Cluster 2 (Anxious): Items 3, 4, 5, 6
   const c2 = ns([t[2], t[3], t[4], t[5]]);
-  // Cluster 3 (Sensory-Attention): Items 8, 11, 12
   const c3 = ns([t[7], t[10], t[11]]);
+  
   return {
     CFOG_Has_FOG: hasFOG,
     CFOG_Frequency: freq,
@@ -422,7 +475,97 @@ function sCFOG(r){
     CFOG_Cluster3_Sensory: hasFOG === 1 ? c3 : (hasFOG === 0 ? 0 : NaN)
   }
 }
-function scorePt(vr,lr){const s={};Object.assign(s,sDemog(vr,lr),sNFOGQ(vr),sPDQ39(vr),sPAS(vr),sCFOG(vr),sHADS(vr),sPROFOG(vr),sPASE(vr),sMSQ(vr),sFESI(vr),sSTAI(vr));s.Caffeine=n2(vr[218]);return s}
-// Completeness ranges (NEW layout)
+
+// Master Aggregator
+function scorePt(vr,lr){
+  const s={};
+  Object.assign(s,sDemog(vr,lr),sNFOGQ(vr),sPDQ39(vr),sPAS(vr),sCFOG(vr),sHADS(vr),sPROFOG(vr),sPASE(vr),sMSQ(vr),sFESI(vr),sSTAI(vr));
+  s.Caffeine=n2(vr[218]);
+  return s;
+}
+
+// UI & Data Flow Processing
 function chkMissing(r){const rng={'NFOG-Q':[9,18],'PDQ-39':[18,57],'PAS':[57,69],'C-FOG':[69,107],'HADS':[107,121],'PRO-FOG':[121,137],'PASE':[137,163],'MSQ':[163,180],'FES-I':[181,197],'STAI Trait':[198,218]};const f={};for(const[sc,[s,e]]of Object.entries(rng)){let nm=0,nt=0;for(let c=s;c<e;c++){nt++;if(ni(n2(r[c])))nm++}f[sc]={nt,nm,pct:Math.round(nm/nt*1000)/10,status:nm===0?'COMPLETE':nm/nt<=.15?'MINOR':'MAJOR'}}return f}
-// ════════════════════════════════════════════════════════
+
+async function run(){
+  document.getElementById('btnrun').classList.add('loading');
+  try {
+    const [va,la]=await Promise.all([readXlsx(vF),readXlsx(lF)]);
+    const vP=parseQ(va),lP=parseQ(la);
+    lg(`Processing ${vP.data.length} records...`);
+    validateLayout(vP.qtext, vP.codes.length);
+    const out=[];
+    vP.data.forEach((vr,i)=>{
+      const pid=String(lP.data[i]?.[2]||'').trim();
+      if(!pid)return;
+      const s=scorePt(vr,lP.data[i]);
+      s._miss=chkMissing(vr);
+      out.push(s);
+    });
+    lg(`Successfully scored ${out.length} valid participants.`,'ok');
+    buildCards(out);
+    lastWB=XLSX.utils.book_new();
+    const ws=XLSX.utils.json_to_sheet(out.map(r=>{const{_miss,...clean}=r;return clean}));
+    XLSX.utils.book_append_sheet(lastWB,ws,"Scores");
+    document.getElementById('results').classList.add('on');
+  } catch(e) {
+    lg('Error processing files: '+e.message,'er');
+  }
+  document.getElementById('btnrun').classList.remove('loading');
+}
+
+function dlExcel(){
+  if(lastWB) XLSX.writeFile(lastWB,'PD_HRV_Scored.xlsx');
+}
+
+// UI Builders (Bars and Pills)
+function buildCards(data){
+  const root=document.getElementById('cards');root.innerHTML='';
+  data.forEach(pt=>{
+    const c=document.createElement('div');c.className='pcard';
+    let mp=Object.entries(pt._miss).map(([k,v])=>`<div class="mpill ${v.status==='COMPLETE'?'mok':v.status==='MINOR'?'mwn':'mbd'}">${k}: ${v.nm} missing</div>`).join('');
+    
+    let html=`<div class="phdr"><div class="pid">${pt.Participant_ID}</div><div class="chips"><div class="chip">Age ${pt.Age||'--'}</div><div class="chip">${pt.Gender||'--'}</div><div class="chip">Onset: ${pt.Symptom_Onset||'--'}</div><div class="chip">Caffeine: ${pt.Caffeine||'--'}</div></div></div><div class="csec">`;
+    
+    // Group 1: FOG & Motor
+    html+=`<div class="cgrp"><div class="cgrp-title">Freezing & Motor</div>`;
+    html+=makeBar(pt.NFOG_Q_Total,CUT.NFOG_Q_Total);
+    html+=makeBar(pt.PRO_FOG_Total,CUT.PRO_FOG_Total);
+    html+=makeBar(pt.PASE_Total,CUT.PASE_Total);
+    html+=`</div>`;
+    
+    // Group 2: Affective & Cognitive
+    html+=`<div class="cgrp"><div class="cgrp-title">Anxiety & Affective</div>`;
+    html+=makeBar(pt.PAS_Total,CUT.PAS_Total);
+    html+=makeBar(pt.STAI_Trait_Total,CUT.STAI_Trait_Total);
+    html+=makeBar(pt.HADS_Anxiety,CUT.HADS_Anxiety);
+    html+=makeBar(pt.HADS_Depression,CUT.HADS_Depression);
+    html+=makeBar(pt.FES_I_Total,CUT.FES_I_Total);
+    html+=makeBar(pt.PDQ39_SI,CUT.PDQ39_SI);
+    html+=makeBar(pt.MSQ_Alertness_0to10,CUT.MSQ_Alertness_0to10);
+    html+=`</div></div>`;
+    
+    html+=`<div class="msec"><div class="mtitle">Data Completeness</div><div class="mpills">${mp}</div></div>`;
+    c.innerHTML=html;root.appendChild(c);
+  });
+}
+
+function makeBar(val,def){
+  if(ni(val))return `<div class="brow"><div class="blbl">${def.label}</div><div class="btrack"><div class="bval na" style="position:absolute;left:8px;top:2px">N/A</div></div><div class="bval na">--</div></div>`;
+  const pct=Math.max(0,Math.min(100,(val-def.min)/(def.max-def.min)*100));
+  const zt=def.zones.find(z=>val>=z.f&&val<=z.t)||def.zones[0];
+  let zhtml='';
+  def.zones.forEach(z=>{
+    const zp=(z.t-z.f)/(def.max-def.min)*100;
+    zhtml+=`<div class="bzone" style="width:${zp}%;background:${z.c};opacity:0.2" onmouseenter="showTip(event,'${z.d}')" onmouseleave="hideTip()"></div>`;
+  });
+  return `<div class="brow"><div class="blbl">${def.label}<span class="refbadge" onmouseenter="showTip(event,'${def.cite}')" onmouseleave="hideTip()">i</span></div><div class="btrack"><div class="bzones">${zhtml}</div><div class="bfill" style="width:${pct}%;background:${zt.c}"></div></div><div class="bval" style="color:${zt.c}">${val} <span style="font-size:9px;color:var(--muted)">/ ${def.max}</span></div></div>`;
+}
+
+// Tooltips
+const tip=document.getElementById('tip');
+window.showTip=(e,txt)=>{tip.innerHTML=txt;tip.style.opacity=1;tip.style.left=Math.min(e.clientX+14,window.innerWidth-260)+'px';tip.style.top=e.clientY+14+'px'};
+window.hideTip=()=>{tip.style.opacity=0};
+</script>
+</body>
+</html>
