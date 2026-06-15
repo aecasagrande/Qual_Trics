@@ -185,10 +185,10 @@ const CUT = {
     label:'STAI – Trait Anxiety', max:80, min:20,
     cite:'Spielberger 1983; PD norms ~40–50: Ehgoetz Martens et al.',
     zones:[
-      {l:'Low',       c:'#22c55e', f:20, t:40, d:'20–39: Below average trait anxiety'},
-      {l:'Average',   c:'#84cc16', f:40, t:50, d:'40–49: Average range for PD population'},
+      {l:'Low',        c:'#22c55e', f:20, t:40, d:'20–39: Below average trait anxiety'},
+      {l:'Average',    c:'#84cc16', f:40, t:50, d:'40–49: Average range for PD population'},
       {l:'Elevated',  c:'#f59e0b', f:50, t:60, d:'50–59: Elevated — clinically noteworthy in PD context'},
-      {l:'High',      c:'#f97316', f:60, t:70, d:'60–69: High trait anxiety'},
+      {l:'High',       c:'#f97316', f:60, t:70, d:'60–69: High trait anxiety'},
       {l:'Very High', c:'#ef4444', f:70, t:80, d:'70–80: Very high — significant clinical concern'},
     ]
   },
@@ -229,7 +229,7 @@ const CUT = {
     cite:'Nieuwboer et al. 2009; MDC = 35.5%; fall cutoff FOG-Q ≥10 (Dibble et al.)',
     zones:[
       {l:'No FOG',    c:'#22c55e', f:0,  t:1,  d:'0: No freezing reported (gating item negative)'},
-      {l:'Mild',      c:'#84cc16', f:1,  t:10, d:'1–9: Mild FOG severity'},
+      {l:'Mild',       c:'#84cc16', f:1,  t:10, d:'1–9: Mild FOG severity'},
       {l:'Moderate',  c:'#f59e0b', f:10, t:20, d:'10–19: Moderate FOG — fall risk elevated (FOG-Q cutoff ≥10)'},
       {l:'Severe',    c:'#ef4444', f:20, t:28, d:'20–28: Severe FOG — above median for freezer population'},
     ]
@@ -239,7 +239,7 @@ const CUT = {
     cite:'Jenkinson et al. 1997; MCID = 4.2–5.4 pts (Horváth et al. 2017)',
     zones:[
       {l:'Minimal',   c:'#22c55e', f:0,  t:16, d:'0–15: Minimal QoL impact'},
-      {l:'Mild',      c:'#84cc16', f:16, t:33, d:'16–32: Mild impact on quality of life'},
+      {l:'Mild',       c:'#84cc16', f:16, t:33, d:'16–32: Mild impact on quality of life'},
       {l:'Moderate',  c:'#f59e0b', f:33, t:50, d:'33–49: Moderate QoL impact'},
       {l:'Significant',c:'#f97316',f:50, t:70, d:'50–69: Significant QoL impact'},
       {l:'Severe',    c:'#ef4444', f:70, t:100,d:'70–100: Severe impact — consistent with advanced PD'},
@@ -259,7 +259,7 @@ const CUT = {
     cite:'Mancini et al. 2021 — quartile-based interpretation',
     zones:[
       {l:'Minimal',   c:'#22c55e', f:0,  t:16, d:'0–15: Minimal daily life impact from FOG'},
-      {l:'Mild',      c:'#84cc16', f:16, t:32, d:'16–31: Mild impact'},
+      {l:'Mild',       c:'#84cc16', f:16, t:32, d:'16–31: Mild impact'},
       {l:'Moderate',  c:'#f59e0b', f:32, t:48, d:'32–47: Moderate impact'},
       {l:'Severe',    c:'#ef4444', f:48, t:64, d:'48–64: Severe daily life impact from FOG'},
     ]
@@ -269,9 +269,9 @@ const CUT = {
     cite:'Washburn et al. 1993; PD mean ~80–120: van Nimwegen et al. 2010',
     zones:[
       {l:'Very Low',  c:'#ef4444', f:0,  t:60,  d:'0–59: Very low activity — concern in PD context'},
-      {l:'Low',       c:'#f97316', f:60,  t:100, d:'60–99: Below PD population average'},
-      {l:'Average',   c:'#f59e0b', f:100, t:160, d:'100–159: Average activity level for PD'},
-      {l:'Active',    c:'#84cc16', f:160, t:220, d:'160–219: Above average — well-managed activity'},
+      {l:'Low',        c:'#f97316', f:60,  t:100, d:'60–99: Below PD population average'},
+      {l:'Average',    c:'#f59e0b', f:100, t:160, d:'100–159: Average activity level for PD'},
+      {l:'Active',     c:'#84cc16', f:160, t:220, d:'160–219: Above average — well-managed activity'},
       {l:'Very Active',c:'#22c55e',f:220, t:360, d:'220+: Very active for PD population'},
     ]
   },
@@ -280,9 +280,9 @@ const CUT = {
     cite:'Mayo Sleep Questionnaire — 0 = sleep all day, 10 = fully awake',
     zones:[
       {l:'Very Low',  c:'#ef4444', f:0, t:4, d:'0–3: Severely reduced alertness — EDS likely'},
-      {l:'Low',       c:'#f97316', f:4, t:6, d:'4–5: Reduced alertness'},
+      {l:'Low',        c:'#f97316', f:4, t:6, d:'4–5: Reduced alertness'},
       {l:'Moderate',  c:'#f59e0b', f:6, t:8, d:'6–7: Moderate alertness'},
-      {l:'Good',      c:'#22c55e', f:8, t:10,d:'8–10: Good daytime alertness'},
+      {l:'Good',       c:'#22c55e', f:8, t:10,d:'8–10: Good daytime alertness'},
     ]
   },
 };
@@ -355,7 +355,6 @@ function sPROFOG(r){const it=[];for(let c=121;c<137;c++)it.push(n2(r[c]));const 
 function sPASE(r){const fw={1:0,2:.11,3:.43,4:1};const hw={1:.5,2:1.5,3:3,4:5};const ac=(fc,hc,wt)=>{const f=n2(r[fc]);if(ni(f)||f===1)return 0;const h=n2(r[hc]);return(fw[f]||0)*(ni(h)?0:(hw[h]||0))*wt};let p=ac(137,139,1)+ac(140,141,1.5)+ac(142,144,1.5)+ac(145,147,3)+ac(148,150,4.5)+ac(151,153,3);for(let c=154;c<=159;c++)p+=(n2(r[c])===2?25:0);if(n2(r[160])===2){const h=n2(r[161]);p+=(ni(h)?0:h)*21}return{PASE_Total:Math.round(p*10)/10}}
 function sFESI(r){const it=[];for(let c=181;c<197;c++)it.push(n2(r[c]));const nm=it.filter(x=>ni(x)).length;return{FES_I_Total:nm<=3?ns(it):NaN,FES_I_Missing:nm}}
 function sSTAI(r){const it=[];for(let c=198;c<218;c++)it.push(n2(r[c]));const rev=new Set([1,3,6,7,10,13,14,16,19]);const cv=it.map((x,i)=>ni(x)?NaN:(rev.has(i+1)?5-x:x));const nm=cv.filter(x=>ni(x)).length;return{STAI_Trait_Total:nm<=4?ns(cv):NaN,STAI_Trait_Missing:nm}}
-function sMSQ(r){return{MSQ_ActsOutDreams:n2(r[163]),MSQ_LegsTwitch:n2(r[169]),MSQ_RestlessLegs:n2(r[170]),MSQ_Sleepwalking:n2(r[174]),MSQ_SnortChoke:n2(r[175]),MSQ_StopBreathing:n2(r[176]),MSQ_LegCramps:n2(r[178]),MSQ_Alertness_0to10:n2(r[179])}}
 function sDemog(vr,lr){const gm={1:'Man',2:'Woman',3:'Non-binary',4:'Self-describe'};const gv=n2(vr[3]);return{Participant_ID:String(lr[2]||''),Gender:gm[gv]||'',Age:n2(vr[5]),Symptom_Onset:String(lr[6]||''),Formal_Diagnosis:String(lr[7]||'')}}
 function sCFOG(r){
   const h = n2(r[69]);
@@ -377,6 +376,29 @@ function sCFOG(r){
     CFOG_Cluster1_Motor: hasFOG === 1 ? c1 : (hasFOG === 0 ? 0 : NaN),
     CFOG_Cluster2_Anxious: hasFOG === 1 ? c2 : (hasFOG === 0 ? 0 : NaN),
     CFOG_Cluster3_Sensory: hasFOG === 1 ? c3 : (hasFOG === 0 ? 0 : NaN)
+  }
+}
+
+// ---> UPDATED COMPREHENSIVE MSQ EXTRACTOR <---
+function sMSQ(r){
+  return {
+    MSQ_Q1_ActsOutDreams: n2(r[163]),
+    MSQ_Q1_A_DurationText: String(r[164] || ''),
+    MSQ_Q1_B_SelfInjury: n2(r[165]),
+    MSQ_Q1_C_PartnerInjury: n2(r[166]),
+    MSQ_Q1_D_ChasedDreams: n2(r[167]),
+    MSQ_Q1_E_MatchingMovements: n2(r[168]),
+    MSQ_Q2_LegsJerkTwitch: n2(r[169]),
+    MSQ_Q3_RestlessLegs: n2(r[170]),
+    MSQ_Q3_A_UrgeToMove: n2(r[171]),
+    MSQ_Q3_B_DecreaseWithMovement: n2(r[172]),
+    MSQ_Q3_C_WorseTime: n2(r[173]),
+    MSQ_Q4_Sleepwalking: n2(r[174]),
+    MSQ_Q5_SnortChokeAwake: n2(r[175]),
+    MSQ_Q6_StopBreathing: n2(r[176]),
+    MSQ_Q6_A_CurrentlyTreated: n2(r[177]),
+    MSQ_Q7_LegCramps: n2(r[178]),
+    MSQ_Alertness_0to10: n2(r[179])
   }
 }
 
