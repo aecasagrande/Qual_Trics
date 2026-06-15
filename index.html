@@ -35,7 +35,6 @@ h1 em{color:var(--accent);font-style:italic;font-weight:300}
 .dt{font-size:12px;color:var(--text);margin-bottom:3px}
 .ds{font-size:11px;color:var(--muted)}
 .dfn{margin-top:8px;font-size:11px;color:var(--green);word-break:break-all}
-
 /* BROWSER FIX: Safely hide inputs instead of using display:none */
 input[type="file"] {
   position: absolute;
@@ -47,7 +46,6 @@ input[type="file"] {
   clip: rect(0,0,0,0);
   border: 0;
 }
-
 /* button */
 .btn-wrap{text-align:center;margin-bottom:36px}
 .btn{display:inline-flex;align-items:center;gap:10px;background:var(--accent);color:#060d14;border:none;border-radius:8px;padding:13px 34px;font-family:'DM Mono',monospace;font-size:13px;font-weight:500;letter-spacing:.04em;cursor:pointer;transition:background .2s,transform .15s,box-shadow .2s}
@@ -141,7 +139,6 @@ input[type="file"] {
       <div class="dfn" id="fnl"></div>
     </label>
   </div>
-
   <div class="btn-wrap">
     <button class="btn" id="btnrun" disabled onclick="run()">
       <div class="spin"></div>
@@ -159,7 +156,6 @@ input[type="file"] {
 </div>
 <div class="tip" id="tip"></div>
 <script>
-
 const CUT = {
   HADS_Anxiety:{
     label:'HADS – Anxiety', max:21, min:0,
@@ -286,7 +282,6 @@ const CUT = {
     ]
   },
 };
-
 let vF=null,lF=null,lastWB=null;
 function dropSetup(zid,iid,which,fnid){
   const z=document.getElementById(zid),inp=document.getElementById(iid),fn=document.getElementById(fnid);
@@ -298,7 +293,6 @@ function dropSetup(zid,iid,which,fnid){
 }
 dropSetup('zv','iv','v','fnv');dropSetup('zl','il','l','fnl');
 function chk(){document.getElementById('btnrun').disabled=!(vF&&lF)}
-
 function lg(msg,t='in'){
   const b=document.getElementById('logbox');b.classList.add('on');
   const now=new Date().toLocaleTimeString('en-US',{hour12:false});
@@ -306,7 +300,6 @@ function lg(msg,t='in'){
   d.innerHTML=`<span class="lt">${now}</span><span class="l${t}">${msg}</span>`;
   b.appendChild(d);b.scrollTop=b.scrollHeight;
 }
-
 function readXlsx(f){
   return new Promise((res,rej)=>{
     const r=new FileReader();
@@ -314,7 +307,6 @@ function readXlsx(f){
     r.onerror=rej;r.readAsArrayBuffer(f);
   });
 }
-
 function parseQ(arr){
   const codes=(arr[0]||[]).map(v=>v==null?'':String(v));
   const qtext=(arr[1]||[]).map(v=>v==null?'':String(v));
@@ -323,7 +315,6 @@ function parseQ(arr){
   // Cleanly skips the 'ImportId' meta-row from Qualtrics.
   return{codes:uc,qtext,data:arr.slice(3)};
 }
-
 function validateLayout(qtext,ncol){
   const anchors=[
     [2,'participant id'],[9,'freezing episodes'],[57,'anxious'],
@@ -341,14 +332,49 @@ function validateLayout(qtext,ncol){
   if(!warns)lg('Layout check passed — anchor columns aligned','ok');
   return warns;
 }
-
 const n2=v=>{if(v===null||v===undefined||v==='')return NaN;const x=Number(v);return isNaN(x)?NaN:x};
 const ni=v=>v===null||v===undefined||Number.isNaN(v)||v==='';
 const ns=a=>a.reduce((s,x)=>s+(ni(x)?0:x),0);
-
 // SCORING LOGIC
 function sNFOGQ(r){const q1=n2(r[9]);if(ni(q1))return{NFOG_Q_Total:NaN,NFOG_Q_FOG_Present:NaN};if(q1===1)return{NFOG_Q_Total:0,NFOG_Q_FOG_Present:0};const it=[];for(let c=10;c<18;c++)it.push(n2(r[c]));const cv=it.map(x=>ni(x)?NaN:x-1);const nm=cv.filter(x=>ni(x)).length;return{NFOG_Q_Total:nm<4?ns(cv):NaN,NFOG_Q_FOG_Present:1,NFOG_Q_Missing:nm}}
-function sPDQ39(r){const raw=[];for(let c=18;c<57;c++)raw.push(n2(r[c]));const cv=raw.map(x=>ni(x)?NaN:x-1);const sb={PDQ39_Mobility:[cv.slice(0,10),10],PDQ39_ADL:[cv.slice(10,16),6],PDQ39_Emotional:[cv.slice(16,22),6],PDQ39_Stigma:[cv.slice(22,26),4],PDQ39_Social:[cv.slice(26,29),3],PDQ39_Cognition:[cv.slice(29,33),4],PDQ39_Communication:[cv.slice(33,36),3],PDQ39_Bodily:[cv.slice(36,39),3]};const sc={};const si=[];for(const[k,[it,n]]of Object.entries(sb)){const nm=it.filter(x=>ni(x)).length;if(nm>Math.floor(n/2)){sc[k]=NaN}else{const v=Math.round(ns(it)/(n*4)*10000)/100;sc[k]=v;si.push(v)}}sc.PDQ39_SI=si.length?Math.round(si.reduce((a,b)=>a+b,0)/si.length*100)/100:NaN;sc.PDQ39_Missing=cv.filter(x=>ni(x)).length;return sc}
+function sPDQ39(r){
+  const raw=[];for(let c=18;c<57;c++)raw.push(n2(r[c]));
+  // PDQ-39 items are coded 1–5 in Qualtrics (-> 0–4 after the -1 shift). Item 28
+  // ("lacked support from spouse/partner") carries a 6th option, "I do not have a
+  // spouse or partner", coded 6. Per the PDQ-39 scoring manual this response is
+  // treated as MISSING and excluded — NOT scored as a 5. Any value outside the
+  // valid 1–5 range is therefore dropped to NaN here.
+  const cv=raw.map(x=>(ni(x)||x<1||x>5)?NaN:x-1);
+  const sb={
+    PDQ39_Mobility:[cv.slice(0,10),10],
+    PDQ39_ADL:[cv.slice(10,16),6],
+    PDQ39_Emotional:[cv.slice(16,22),6],
+    PDQ39_Stigma:[cv.slice(22,26),4],
+    PDQ39_Social:[cv.slice(26,29),3],
+    PDQ39_Cognition:[cv.slice(29,33),4],
+    PDQ39_Communication:[cv.slice(33,36),3],
+    PDQ39_Bodily:[cv.slice(36,39),3]
+  };
+  const sc={};const si=[];
+  for(const[k,[it,n]]of Object.entries(sb)){
+    const answered=it.filter(x=>!ni(x));   // only items the participant actually answered
+    const nAns=answered.length;
+    const nMiss=n-nAns;
+    // PDQ-39 rule: if MORE than half a dimension's items are missing, the
+    // dimension score is not calculated. Otherwise prorate over ANSWERED items:
+    //   dimension = (sum of answered items / (nAns * 4)) * 100.
+    if(nMiss>Math.floor(n/2)||nAns===0){
+      sc[k]=NaN;
+    }else{
+      const sum=answered.reduce((a,b)=>a+b,0);
+      const v=Math.round(sum/(nAns*4)*10000)/100;
+      sc[k]=v;si.push(v);
+    }
+  }
+  sc.PDQ39_SI=si.length?Math.round(si.reduce((a,b)=>a+b,0)/si.length*100)/100:NaN;
+  sc.PDQ39_Missing=cv.filter(x=>ni(x)).length;
+  return sc
+}
 function sPAS(r){const p=[];for(let c=57;c<62;c++)p.push(n2(r[c]));const e=[];for(let c=62;c<66;c++)e.push(n2(r[c]));const av=[];for(let c=66;c<69;c++)av.push(n2(r[c]));const sub=(it,lb)=>{const nm=it.filter(x=>ni(x)).length;return{[lb]:nm>Math.floor(it.length/2)?NaN:ns(it),[lb+'_M']:nm}};const s={...sub(p,'PAS_Persistent'),...sub(e,'PAS_Episodic'),...sub(av,'PAS_Avoidance')};const al=[...p,...e,...av];s.PAS_Total=al.filter(x=>ni(x)).length<=3?ns(al):NaN;return s}
 function sHADS(r){const it=[];for(let c=107;c<121;c++)it.push(n2(r[c]));const anx=[0,2,4,6,8,10,12].map(i=>it[i]);const dep=[1,3,5,7,9,11,13].map(i=>it[i]);const sub=(v,lb)=>{const nm=v.filter(x=>ni(x)).length;return{[lb]:nm<=2?ns(v):NaN,[lb+'_M']:nm}};return{...sub(anx,'HADS_Anxiety'),...sub(dep,'HADS_Depression')}}
 function sPROFOG(r){const it=[];for(let c=121;c<137;c++)it.push(n2(r[c]));const cv=it.map(x=>ni(x)?NaN:x-1);const nm=cv.filter(x=>ni(x)).length;return{PRO_FOG_Total:nm<=3?ns(cv):NaN,PRO_FOG_Missing:nm}}
@@ -378,7 +404,6 @@ function sCFOG(r){
     CFOG_Cluster3_Sensory: hasFOG === 1 ? c3 : (hasFOG === 0 ? 0 : NaN)
   }
 }
-
 // ---> UPDATED COMPREHENSIVE MSQ EXTRACTOR <---
 function sMSQ(r){
   return {
@@ -401,10 +426,8 @@ function sMSQ(r){
     MSQ_Alertness_0to10: n2(r[179])
   }
 }
-
 function scorePt(vr,lr){const s={};Object.assign(s,sDemog(vr,lr),sNFOGQ(vr),sPDQ39(vr),sPAS(vr),sCFOG(vr),sHADS(vr),sPROFOG(vr),sPASE(vr),sMSQ(vr),sFESI(vr),sSTAI(vr));s.Caffeine=n2(vr[218]);return s}
 function chkMissing(r){const rng={'NFOG-Q':[9,18],'PDQ-39':[18,57],'PAS':[57,69],'C-FOG':[69,107],'HADS':[107,121],'PRO-FOG':[121,137],'PASE':[137,163],'MSQ':[163,180],'FES-I':[181,197],'STAI Trait':[198,218]};const f={};for(const[sc,[s,e]]of Object.entries(rng)){let nm=0,nt=0;for(let c=s;c<e;c++){nt++;if(ni(n2(r[c])))nm++}f[sc]={nt,nm,pct:Math.round(nm/nt*1000)/10,status:nm===0?'COMPLETE':nm/nt<=.15?'MINOR':'MAJOR'}}return f}
-
 async function run(){
   document.getElementById('btnrun').classList.add('loading');
   try {
@@ -431,9 +454,7 @@ async function run(){
   }
   document.getElementById('btnrun').classList.remove('loading');
 }
-
 function dlExcel(){if(lastWB) XLSX.writeFile(lastWB,'PD_HRV_Scored.xlsx');}
-
 function buildCards(data){
   const root=document.getElementById('cards');root.innerHTML='';
   data.forEach(pt=>{
@@ -462,7 +483,6 @@ function buildCards(data){
     c.innerHTML=html;root.appendChild(c);
   });
 }
-
 function makeBar(val,def){
   if(ni(val))return `<div class="brow"><div class="blbl">${def.label}</div><div class="btrack"><div class="bval na" style="position:absolute;left:8px;top:2px">N/A</div></div><div class="bval na">--</div></div>`;
   const pct=Math.max(0,Math.min(100,(val-def.min)/(def.max-def.min)*100));
@@ -474,7 +494,6 @@ function makeBar(val,def){
   });
   return `<div class="brow"><div class="blbl">${def.label}<span class="refbadge" onmouseenter="showTip(event,'${def.cite}')" onmouseleave="hideTip()">i</span></div><div class="btrack"><div class="bzones">${zhtml}</div><div class="bfill" style="width:${pct}%;background:${zt.c}"></div></div><div class="bval" style="color:${zt.c}">${val} <span style="font-size:9px;color:var(--muted)">/ ${def.max}</span></div></div>`;
 }
-
 const tip=document.getElementById('tip');
 window.showTip=(e,txt)=>{tip.innerHTML=txt;tip.style.opacity=1;tip.style.left=Math.min(e.clientX+14,window.innerWidth-260)+'px';tip.style.top=e.clientY+14+'px'};
 window.hideTip=()=>{tip.style.opacity=0};
