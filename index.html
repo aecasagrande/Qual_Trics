@@ -230,6 +230,24 @@ const CUT = {
       {l:'Severe',    c:'#ef4444', f:20, t:28, d:'20–28: Severe FOG — above median for freezer population'},
     ]
   },
+  NFOG_Q_Part2_Severity:{
+    label:'NFOG-Q · Part II (Severity)', max:19, min:0,
+    cite:'Nieuwboer et al. 2009 — Part II, items 2–6 (FOG frequency & duration during turning/initiation). No validated subscale cut-offs; shading shows position within the 0–19 range, not clinical thresholds.',
+    zones:[
+      {l:'Lower',  c:'#84cc16', f:0,  t:7,  d:'0–6: Lower end of the Part II severity range'},
+      {l:'Mid',     c:'#f59e0b', f:7,  t:13, d:'7–12: Mid Part II severity'},
+      {l:'Higher', c:'#ef4444', f:13, t:19, d:'13–19: Higher end of the Part II severity range'},
+    ]
+  },
+  NFOG_Q_Part3_DailyLife:{
+    label:'NFOG-Q · Part III (Daily Life)', max:9, min:0,
+    cite:'Nieuwboer et al. 2009 — Part III, items 7–9 (impact of FOG on daily life). No validated subscale cut-offs; shading shows position within the 0–9 range, not clinical thresholds.',
+    zones:[
+      {l:'Lower',  c:'#84cc16', f:0, t:4, d:'0–3: Lower daily-life impact'},
+      {l:'Mid',     c:'#f59e0b', f:4, t:7, d:'4–6: Moderate daily-life impact'},
+      {l:'Higher', c:'#ef4444', f:7, t:9, d:'7–9: Higher daily-life impact'},
+    ]
+  },
   PDQ39_SI:{
     label:'PDQ-39 Summary Index', max:100, min:0,
     cite:'Jenkinson et al. 1997; MCID = 4.2–5.4 pts (Horváth et al. 2017)',
@@ -336,7 +354,28 @@ const n2=v=>{if(v===null||v===undefined||v==='')return NaN;const x=Number(v);ret
 const ni=v=>v===null||v===undefined||Number.isNaN(v)||v==='';
 const ns=a=>a.reduce((s,x)=>s+(ni(x)?0:x),0);
 // SCORING LOGIC
-function sNFOGQ(r){const q1=n2(r[9]);if(ni(q1))return{NFOG_Q_Total:NaN,NFOG_Q_FOG_Present:NaN};if(q1===1)return{NFOG_Q_Total:0,NFOG_Q_FOG_Present:0};const it=[];for(let c=10;c<18;c++)it.push(n2(r[c]));const cv=it.map(x=>ni(x)?NaN:x-1);const nm=cv.filter(x=>ni(x)).length;return{NFOG_Q_Total:nm<4?ns(cv):NaN,NFOG_Q_FOG_Present:1,NFOG_Q_Missing:nm}}
+function sNFOGQ(r){
+  const q1=n2(r[9]);
+  if(ni(q1))return{NFOG_Q_Total:NaN,NFOG_Q_FOG_Present:NaN,NFOG_Q_Part2_Severity:NaN,NFOG_Q_Part3_DailyLife:NaN};
+  if(q1===1)return{NFOG_Q_Total:0,NFOG_Q_FOG_Present:0,NFOG_Q_Part2_Severity:0,NFOG_Q_Part3_DailyLife:0};
+  const it=[];for(let c=10;c<18;c++)it.push(n2(r[c]));
+  const cv=it.map(x=>ni(x)?NaN:x-1);
+  const nm=cv.filter(x=>ni(x)).length;
+  // Sub-scores — Part II = items 2–6 (cols 10–14, range 0–19); Part III = items 7–9 (cols 15–17, range 0–9).
+  // NFOG-Q has no validated proration, so each sub-score is computed only when ALL of its items are present;
+  // otherwise it is NaN. The Total keeps its original tolerance (computed when <4 of the 8 items are missing).
+  const p2=cv.slice(0,5), p3=cv.slice(5,8);
+  const p2m=p2.filter(x=>ni(x)).length, p3m=p3.filter(x=>ni(x)).length;
+  return{
+    NFOG_Q_Total:nm<4?ns(cv):NaN,
+    NFOG_Q_FOG_Present:1,
+    NFOG_Q_Missing:nm,
+    NFOG_Q_Part2_Severity:p2m===0?ns(p2):NaN,
+    NFOG_Q_Part3_DailyLife:p3m===0?ns(p3):NaN,
+    NFOG_Q_Part2_Missing:p2m,
+    NFOG_Q_Part3_Missing:p3m
+  }
+}
 function sPDQ39(r){
   const raw=[];for(let c=18;c<57;c++)raw.push(n2(r[c]));
   // PDQ-39 items are coded 1–5 in Qualtrics (-> 0–4 after the -1 shift). Item 28
@@ -465,6 +504,8 @@ function buildCards(data){
     
     html+=`<div class="cgrp"><div class="cgrp-title">Freezing & Motor</div>`;
     html+=makeBar(pt.NFOG_Q_Total,CUT.NFOG_Q_Total);
+    html+=makeBar(pt.NFOG_Q_Part2_Severity,CUT.NFOG_Q_Part2_Severity);
+    html+=makeBar(pt.NFOG_Q_Part3_DailyLife,CUT.NFOG_Q_Part3_DailyLife);
     html+=makeBar(pt.PRO_FOG_Total,CUT.PRO_FOG_Total);
     html+=makeBar(pt.PASE_Total,CUT.PASE_Total);
     html+=`</div>`;
